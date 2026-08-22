@@ -22,11 +22,12 @@ import {
   LogOut,
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
+import { apiService } from "@/services/api";
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { stores, activeStore, orders } = usePlatform();
+  const { stores, activeStore, setActiveStoreId, orders } = usePlatform();
   const myStore = activeStore || stores[0];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -52,11 +53,35 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
         try { setMerchantProfile(JSON.parse(rawProfile)); } catch(e) {}
       }
 
+      if (token) {
+        apiService.getMerchantMe(token).then((res) => {
+          if (res) {
+            const merch = res.merchant || res;
+            const store = res.stores?.[0];
+            const bName = store?.name || merch?.name;
+            const bAddr = store?.address || merch?.address;
+            if (bName) {
+              const profile = {
+                fullName: merch?.owner_name || merch?.full_name || bName,
+                businessName: bName,
+                address: bAddr || "Store Address",
+                businessType: store?.store_type || "Restaurant",
+              };
+              setMerchantProfile(profile);
+              localStorage.setItem("merchant_profile", JSON.stringify(profile));
+            }
+            if (store?.id) {
+              setActiveStoreId(store.id);
+            }
+          }
+        }).catch(() => {});
+      }
+
       if (!hasAuth && !isAuthPage) {
         router.push("/merchant/login");
       }
     }
-  }, [pathname, isAuthPage, router]);
+  }, [pathname, isAuthPage, router, setActiveStoreId]);
 
   // Handle Logout
   const handleLogout = () => {
@@ -216,7 +241,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-[#66736E] dark:text-slate-400 hidden sm:inline">Welcome back,</span>
                 <h1 className="text-base sm:text-xl font-black text-slate-900 dark:text-white truncate flex items-center gap-1.5">
-                  <span>{merchantProfile?.businessName || myStore?.name || "Your Business Store"}</span>
+                  <span>{merchantProfile?.businessName || (activeStore && activeStore.id !== "store-1" ? activeStore.name : "Your Business Store")}</span>
                   <CheckCircle2 className="w-4 h-4 text-[#087F5B] fill-[#087F5B] text-white shrink-0" />
                 </h1>
               </div>

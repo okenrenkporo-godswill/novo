@@ -24,6 +24,25 @@ export default function MerchantLoginPage() {
         const token = data.access_token || data.data.access_token;
         localStorage.setItem("access_token", token);
         localStorage.setItem("merchant_session", "true");
+
+        try {
+          const merchRes = await apiService.getMerchantMe(token);
+          if (merchRes) {
+            const merch = merchRes.merchant || merchRes;
+            const store = merchRes.stores?.[0];
+            const bName = store?.name || merch?.name;
+            if (bName) {
+              const profile = {
+                fullName: merch?.owner_name || merch?.full_name || bName,
+                businessName: bName,
+                address: store?.address || merch?.address || "Store Address",
+                businessType: store?.store_type || "Restaurant",
+              };
+              localStorage.setItem("merchant_profile", JSON.stringify(profile));
+            }
+          }
+        } catch (mErr) {}
+
         router.push("/merchant");
         return;
       }
