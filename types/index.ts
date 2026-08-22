@@ -17,6 +17,22 @@ export interface CustomerProfile extends User {
   favoriteStoreIds: string[];
 }
 
+export interface MerchantProfile {
+  id?: string;
+  userId?: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  businessName: string;
+  businessType: string;
+  address: string;
+  isVerified?: boolean;
+  isOpen?: boolean;
+  deliveryFee?: number;
+  minOrder?: number;
+  createdAt?: string;
+}
+
 export interface ProductOption {
   id: string;
   name: string;
@@ -39,12 +55,15 @@ export interface Product {
 
 export interface Store {
   id: string;
+  merchantId?: string;
   name: string;
   slug: string;
   description: string;
   logo: string;
   banner: string;
   category: "restaurant" | "supermarket" | "pharmacy" | "express" | "drinks";
+  city?: string;
+  state?: string;
   cuisineType?: string;
   rating: number;
   reviewCount: number;
@@ -56,6 +75,15 @@ export interface Store {
   isVerified: boolean;
   status: "active" | "pending" | "suspended";
   phone: string;
+  complianceInfo?: {
+    licenseNumber?: string;
+    superintendentPharmacist?: string;
+    nafdacNumber?: string;
+    foodHygieneCert?: string;
+    cacNumber?: string;
+    hasColdChainStorage?: boolean;
+    verificationStatus?: "verified" | "pending_review" | "document_required";
+  };
 }
 
 export interface CartItem {
@@ -66,11 +94,18 @@ export interface CartItem {
 }
 
 export type OrderStatus =
+  | "new"
+  | "pending"
   | "pending_merchant"
+  | "accepted"
+  | "confirmed"
   | "preparing"
+  | "ready"
   | "ready_for_pickup"
+  | "out_for_delivery"
   | "rider_assigned"
   | "picked_up"
+  | "completed"
   | "delivered"
   | "cancelled";
 
@@ -105,6 +140,16 @@ export interface Order {
     riderRating?: number;
     comment?: string;
   };
+}
+
+export interface WalletTransaction {
+  id: string;
+  reference: string;
+  type: "credit" | "debit" | "commission" | "withdrawal";
+  amount: number;
+  description: string;
+  status: "completed" | "pending" | "failed";
+  createdAt: string;
 }
 
 export interface RiderProfile extends User {

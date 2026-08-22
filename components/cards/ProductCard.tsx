@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, Check } from "lucide-react";
+import { Plus, Check, Heart } from "lucide-react";
 import { Product } from "@/types";
+import { usePlatform } from "@/store/PlatformContext";
 
 interface ProductCardProps {
   product: Product;
@@ -15,13 +16,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onSelectProduct,
 }) => {
+  const { favorites, toggleFavorite } = usePlatform();
   const [added, setAdded] = useState(false);
+  const isFav = favorites.includes(product.id);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1400);
+  };
+
+  const handleFav = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(product.id);
   };
 
   return (
@@ -36,6 +44,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+
+        <button
+          type="button"
+          onClick={handleFav}
+          className="absolute top-1.5 left-1.5 p-1.5 rounded-full bg-slate-950/40 hover:bg-slate-950/70 backdrop-blur-xs text-white transition-transform active:scale-90"
+        >
+          <Heart className={`w-3.5 h-3.5 ${isFav ? "fill-rose-500 text-rose-500" : "text-white"}`} />
+        </button>
+
         {!product.inStock && (
           <div className="absolute inset-0 bg-slate-950/75 backdrop-blur-[1px] flex items-center justify-center">
             <span className="text-[9px] font-black uppercase text-rose-400 bg-rose-950/90 px-1.5 py-0.5 rounded-md">

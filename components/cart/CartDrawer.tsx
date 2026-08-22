@@ -52,7 +52,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   Your cart is empty
                 </h4>
                 <p className="text-xs text-slate-500 max-w-xs mt-1">
-                  Explore top Sapele restaurants and shops to add delicious meals or groceries!
+                  Explore top restaurants and shops to add delicious meals or groceries!
                 </p>
               </div>
             ) : (

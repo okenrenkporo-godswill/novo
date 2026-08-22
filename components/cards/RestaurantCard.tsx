@@ -2,14 +2,24 @@
 
 import React from "react";
 import Link from "next/link";
-import { Star, Clock, Bike, ShieldCheck } from "lucide-react";
+import { Star, Clock, Bike, ShieldCheck, Heart } from "lucide-react";
 import { Store } from "@/types";
+import { usePlatform } from "@/store/PlatformContext";
 
 interface RestaurantCardProps {
   store: Store;
 }
 
 export const RestaurantCard: React.FC<RestaurantCardProps> = ({ store }) => {
+  const { favorites, toggleFavorite } = usePlatform();
+  const isFav = favorites.includes(store.id);
+
+  const handleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(store.id);
+  };
+
   return (
     <Link
       href={`/shop?store=${store.id}`}
@@ -23,6 +33,20 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ store }) => {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+
+        {/* Favorite Button */}
+        <button
+          type="button"
+          onClick={handleFavorite}
+          className="absolute top-3 left-3 p-2 rounded-full bg-slate-950/40 hover:bg-slate-950/70 backdrop-blur-md transition-transform active:scale-90 text-white cursor-pointer"
+          title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+        >
+          <Heart
+            className={`w-4 h-4 transition-colors ${
+              isFav ? "fill-rose-500 text-rose-500" : "text-white"
+            }`}
+          />
+        </button>
 
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md text-xs font-black text-slate-900 dark:text-slate-100 shadow-md">

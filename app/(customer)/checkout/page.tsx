@@ -6,12 +6,13 @@ import { CreditCard, Banknote, Landmark, MapPin, ArrowRight, ShieldCheck, Heart 
 import { usePlatform } from "@/store/PlatformContext";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { apiService } from "@/services/api";
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartSubtotal, cartDeliveryFee, placeOrder } = usePlatform();
 
-  const [address, setAddress] = useState("Apartment 4B, Palm Grove Estate, Okpe Road, Sapele");
+  const [address, setAddress] = useState("Apartment 4B, Palm Grove Estate, Commercial Avenue");
   const [paymentMethod, setPaymentMethod] = useState<"card" | "cash" | "transfer">("card");
   const [tip, setTip] = useState(500);
   const [promoCode, setPromoCode] = useState("");
@@ -24,25 +25,42 @@ export default function CheckoutPage() {
 
   const handleApplyPromo = (e: React.FormEvent) => {
     e.preventDefault();
-    if (promoCode.trim().toUpperCase() === "SAPELE500" || promoCode.trim().toUpperCase() === "NOVO") {
+    if (promoCode.trim().toUpperCase() === "NOVO500" || promoCode.trim().toUpperCase() === "NOVO") {
       setPromoApplied(true);
     } else {
-      alert("Invalid promo code. Try 'NOVO' or 'SAPELE500'.");
+      alert("Invalid promo code. Try 'NOVO' or 'NOVO500'.");
     }
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (cart.length === 0) {
       alert("Your cart is empty!");
       return;
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+      const targetStoreId = cart[0]?.product?.storeId || (cart[0]?.product as any)?.store_id;
+
+      if (token && targetStoreId) {
+        await apiService.createOrder({
+          store_id: targetStoreId,
+          subtotal: cartSubtotal,
+          delivery_fee: cartDeliveryFee,
+          service_fee: serviceFee,
+          tip: tip,
+          total: total,
+          delivery_address: address,
+        }, token);
+      }
+    } catch (e) {
+      console.warn("Backend order sync note:", e);
+    } finally {
       const order = placeOrder(address, paymentMethod, tip);
       setIsSubmitting(false);
       router.push(`/orders?orderId=${order.id}`);
-    }, 1000);
+    }
   };
 
   if (cart.length === 0) {

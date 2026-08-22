@@ -211,7 +211,7 @@ export default function RiderHubPage() {
           </h3>
           {availableJobs.length === 0 ? (
             <div className="p-8 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-400 text-xs font-medium">
-              {riderProfile.isOnline ? "Waiting for new orders in Sapele area..." : "You are offline. Toggle Online to accept delivery jobs."}
+              {riderProfile.isOnline ? "Waiting for new orders in your area..." : "You are offline. Toggle Online to accept delivery jobs."}
             </div>
           ) : (
             availableJobs.map((job) => (
@@ -251,7 +251,7 @@ export default function RiderHubPage() {
 
           <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs text-left flex flex-col gap-1">
             <span className="font-bold text-slate-900 dark:text-slate-100">Pickup: FoodLAND Restaurant</span>
-            <span className="text-slate-500">Dropoff: Okpe Road, Sapele (2.4 km)</span>
+            <span className="text-slate-500">Dropoff: 14 Commercial Avenue (2.4 km)</span>
           </div>
 
           <div className="text-xs font-bold text-amber-500 font-mono">

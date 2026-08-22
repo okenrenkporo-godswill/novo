@@ -13,17 +13,27 @@ import {
   PlatformAnalytics,
   Review,
 } from "@/types";
-import { INITIAL_STORES, INITIAL_PRODUCTS, INITIAL_RIDERS, INITIAL_ORDERS } from "@/services/api";
+import { INITIAL_STORES, INITIAL_PRODUCTS, INITIAL_RIDERS, INITIAL_ORDERS, apiService } from "@/services/api";
 
 interface PlatformContextType {
   // Role & Auth State
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   currentUser: User;
+  isAuthenticated: boolean;
+  loginUser: (token: string, email?: string) => void;
+  logout: () => void;
+  favorites: string[];
+  toggleFavorite: (id: string) => void;
+  theme: "light" | "dark";
+  toggleTheme: () => void;
 
   // Stores
   stores: Store[];
-  addStore: (store: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">) => void;
+  activeStoreId: string;
+  setActiveStoreId: (id: string) => void;
+  activeStore: Store;
+  addStore: (store: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">) => Store;
   updateStore: (id: string, updates: Partial<Store>) => void;
   toggleStoreStatus: (id: string) => void;
 
@@ -85,11 +95,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     email: "godswill@novo.ng",
     phone: "+234 802 111 9900",
     role: "customer",
-    address: "Apartment 4B, Palm Grove Estate, Okpe Road, Sapele",
+    address: "Apartment 4B, Palm Grove Estate, Commercial Avenue",
     createdAt: new Date().toISOString(),
   });
 
   const [stores, setStores] = useState<Store[]>(INITIAL_STORES);
+  const [activeStoreId, setActiveStoreId] = useState<string>(INITIAL_STORES[0].id);
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -108,6 +119,60 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     },
   ]);
 
+  const [favorites, setFavorites] = useState<string[]>(["store-1", "prod-1"]);
+
+  const toggleFavorite = (id: string) => {
+    setFavorites((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = (localStorage.getItem("novo_theme") as "light" | "dark") || "light";
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark", theme === "dark");
+      localStorage.setItem("novo_theme", theme);
+    }
+  }, [theme]);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check auth state on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      setIsAuthenticated(!!token);
+    }
+  }, []);
+
+  const loginUser = (token: string, email?: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("access_token", token);
+      if (email) localStorage.setItem("user_email", email);
+    }
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_email");
+    }
+    setIsAuthenticated(false);
+  };
+
   // Load from LocalStorage on client start
   useEffect(() => {
     try {
@@ -125,6 +190,73 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
+  // Fetch backend stores and products on mount so new stores appear live for customers
+  useEffect(() => {
+    async function loadBackendStoresAndProducts() {
+      try {
+        const backendStores = await apiService.getStores();
+        if (Array.isArray(backendStores) && backendStores.length > 0) {
+          const formattedStores: Store[] = backendStores.map((bs: any) => ({
+            id: bs.id,
+            merchantId: bs.merchant_id,
+            name: bs.name,
+            slug: bs.slug || (bs.name ? bs.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : `store-${bs.id}`),
+            description: bs.description || `${bs.name} - Quality items & fast delivery`,
+            category: (bs.store_type || "restaurant").toLowerCase() as any,
+            address: bs.address || "Lagos, Nigeria",
+            phone: bs.phone || "+2348000000000",
+            rating: bs.rating || 5.0,
+            reviewCount: bs.review_count || 0,
+            isVerified: true,
+            status: "active",
+            isOpening: bs.is_open ?? true,
+            banner: bs.banner || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+            logo: bs.logo || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=200&q=80",
+            deliveryFee: 450,
+            deliveryTime: "20-30 min",
+            minOrder: 1000,
+            cuisineType: bs.store_type || "Restaurant",
+          }));
+
+          setStores((prev) => {
+            const map = new Map<string, Store>();
+            formattedStores.forEach((s) => map.set(s.id, s));
+            prev.forEach((s) => {
+              if (!map.has(s.id)) map.set(s.id, s);
+            });
+            return Array.from(map.values());
+          });
+        }
+
+        const backendProducts = await apiService.getProducts();
+        if (Array.isArray(backendProducts) && backendProducts.length > 0) {
+          const formattedProducts: Product[] = backendProducts.map((bp: any) => ({
+            id: bp.id,
+            storeId: bp.store_id || bp.storeId,
+            name: bp.name,
+            description: bp.description || "",
+            price: bp.price || 0,
+            category: bp.category || "General",
+            image: bp.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
+            inStock: bp.in_stock !== false,
+          }));
+          setProducts((prev) => {
+            const map = new Map<string, Product>();
+            formattedProducts.forEach((p) => map.set(p.id, p));
+            prev.forEach((p) => {
+              if (!map.has(p.id)) map.set(p.id, p);
+            });
+            return Array.from(map.values());
+          });
+        }
+      } catch (e) {
+        console.error("Failed to load backend stores/products in PlatformContext:", e);
+      }
+    }
+
+    loadBackendStoresAndProducts();
+  }, []);
+
   // Save to LocalStorage on state change
   useEffect(() => {
     try {
@@ -138,15 +270,19 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [stores, products, orders, cart, riderProfile]);
 
   // Store management
-  const addStore = (storeData: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">) => {
+  const addStore = (storeData: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">): Store => {
     const newStore: Store = {
       ...storeData,
       id: `store-${Date.now()}`,
       rating: 5.0,
       reviewCount: 0,
-      isVerified: false,
+      isVerified: true,
+      status: "active",
+      isOpening: true,
     };
     setStores((prev) => [newStore, ...prev]);
+    setActiveStoreId(newStore.id);
+    return newStore;
   };
 
   const updateStore = (id: string, updates: Partial<Store>) => {
@@ -241,14 +377,15 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     paymentMethod: "card" | "cash" | "transfer",
     tipAmount = 0
   ): Order => {
-    const store = stores.find((s) => s.id === cart[0]?.product.storeId) || stores[0];
+    const targetStoreId = cart[0]?.product?.storeId || (cart[0]?.product as any)?.store_id;
+    const store = stores.find((s) => s.id === targetStoreId) || stores[0];
     const newOrder: Order = {
       id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
       customerId: currentUser.id,
       customerName: currentUser.name,
       customerPhone: currentUser.phone,
-      deliveryAddress: deliveryAddress || currentUser.address || "Sapele, Nigeria",
-      storeId: store.id,
+      deliveryAddress: deliveryAddress || currentUser.address || "14 Commercial Avenue, Central District",
+      storeId: targetStoreId || store.id,
       storeName: store.name,
       storeAddress: store.address,
       items: [...cart],
@@ -380,14 +517,26 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     commissionEarned: commissionEarned || 18540,
   };
 
+  const activeStore = stores.find((s) => s.id === activeStoreId) || stores[0];
+
   return (
     <PlatformContext.Provider
       value={{
         currentRole,
         setCurrentRole,
         currentUser,
+        isAuthenticated,
+        loginUser,
+        logout,
+        favorites,
+        toggleFavorite,
+        theme,
+        toggleTheme,
 
         stores,
+        activeStoreId,
+        setActiveStoreId,
+        activeStore,
         addStore,
         updateStore,
         toggleStoreStatus,

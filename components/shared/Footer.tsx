@@ -60,18 +60,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/auth?role=merchant" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Register your business
-                </Link>
-              </li>
-              <li>
                 <Link href="/auth?role=rider" className="hover:text-white hover:translate-x-1 inline-block transition-all">
                   Couriers
-                </Link>
-              </li>
-              <li>
-                <Link href="/merchant" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Novo Business
                 </Link>
               </li>
             </ul>
@@ -207,8 +197,8 @@ export function Footer() {
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-slate-400">
           <p>© 2026 Novo Delivery Express. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <span className="hover:text-white transition-colors cursor-pointer">Sapele, Nigeria</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Glovo Marketplace Platform</span>
+            <span className="hover:text-white transition-colors cursor-pointer">Nigeria</span>
+            <span className="hover:text-white transition-colors cursor-pointer">Novo Delivery Platform</span>
           </div>
         </div>
 

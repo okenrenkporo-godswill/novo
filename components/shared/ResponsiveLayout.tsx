@@ -6,8 +6,10 @@ import { usePathname } from "next/navigation";
 import { ShoppingBag, Search, User, Clock } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
-import { RoleSwitcher } from "@/components/shared/RoleSwitcher";
 import { Footer } from "@/components/shared/Footer";
+import { NotificationBell } from "@/components/shared/NotificationBell";
+import { SupportChatWidget } from "@/components/shared/SupportChatWidget";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -15,7 +17,7 @@ interface ResponsiveLayoutProps {
 
 export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   const pathname = usePathname();
-  const { cart, isCartOpen, setIsCartOpen } = usePlatform();
+  const { cart, isCartOpen, setIsCartOpen, isAuthenticated } = usePlatform();
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -34,8 +36,16 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
     { label: "Profile", href: "/profile", icon: <User className="w-5 h-5" /> },
   ];
 
+  const isHomePage = pathname === "/";
+
   return (
-    <div className="flex flex-col min-h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20 sm:pb-0 font-sans">
+    <div
+      className={`flex flex-col min-h-screen w-full pb-20 sm:pb-0 font-sans ${
+        isHomePage
+          ? "bg-[#0b0f19] text-slate-100"
+          : "bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100"
+      }`}
+    >
       {/* GLOBAL HEADER (For Customer View except Home Page) */}
       {isCustomerHeaderVisible && (
         <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md">
@@ -77,6 +87,9 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
 
             {/* Right Actions */}
             <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <NotificationBell />
+
               <button
                 onClick={() => setIsCartOpen(true)}
                 className="relative p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors cursor-pointer"
@@ -89,12 +102,14 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
                 )}
               </button>
 
-              <Link
-                href="/auth"
-                className="hidden sm:inline-flex px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 transition-colors"
-              >
-                Account
-              </Link>
+              {!isAuthenticated && (
+                <Link
+                  href="/auth"
+                  className="hidden sm:inline-flex px-4 py-2 rounded-xl text-xs font-extrabold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 transition-colors"
+                >
+                  Account
+                </Link>
+              )}
             </div>
           </div>
         </header>
@@ -132,8 +147,8 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
       {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
-      {/* Global Role Switcher */}
-      <RoleSwitcher />
+      {/* 24/7 Customer Support Floating Assistant */}
+      <SupportChatWidget />
     </div>
   );
 }

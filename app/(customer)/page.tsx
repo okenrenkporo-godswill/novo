@@ -7,74 +7,103 @@ import {
   Search,
   ShoppingBag,
   ArrowRight,
+  Bike,
+  Zap,
+  ShieldCheck,
+  Clock,
+  Navigation,
+  PackageCheck,
+  UtensilsCrossed,
+  Pill,
+  ShoppingBasket,
+  Flame,
+  Star,
+  ChevronRight,
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { RestaurantCard } from "@/components/cards/RestaurantCard";
 import { ProductCard } from "@/components/cards/ProductCard";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Product } from "@/types";
 
 const HERO_SLIDES = [
   {
     image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=80",
-    text: "African Food 🍲",
-    caption: "Top Restaurant Food",
+    text: "Fast Food 🍲",
+    caption: "Hot Delicious Meals & Fast Delivery",
+    category: "restaurant",
   },
   {
     image: "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1000&q=80",
-    text: "Pharmacy Meds 💊",
-    caption: "Pharmacy & Medical Delivery",
+    text: "Pharmacy 💊",
+    caption: "Essential Healthcare & Prescription Meds",
+    category: "pharmacy",
   },
   {
     image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80",
     text: "Traditional Soups 🍲",
-    caption: "Homestyle Traditional Dishes",
+    caption: "Homestyle Authentic Nigerian Meals",
+    category: "restaurant",
   },
   {
     image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1000&q=80",
-    text: "Groceries 🛍️",
-    caption: "Groceries & Supermarket Essentials",
+    text: "Fresh Groceries 🛍️",
+    caption: "Supermarket Household Essentials",
+    category: "supermarket",
   },
   {
     image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1000&q=80",
-    text: "Spicy Suya 🍢",
-    caption: "Express Suya & Finger Food",
+    text: "Express Suya 🍢",
+    caption: "Sizzling Nighttime Grills & Finger Food",
+    category: "express",
   },
 ];
 
 const CATEGORIES = [
-  { id: "all", label: "All Stores" },
-  { id: "restaurant", label: "Restaurants" },
-  { id: "supermarket", label: "Groceries" },
-  { id: "pharmacy", label: "Pharmacy" },
-  { id: "express", label: "Express Suya" },
+  { id: "all", label: "All Stores", icon: <ShoppingBag className="w-4 h-4 text-emerald-500" /> },
+  { id: "restaurant", label: "Restaurants", icon: <UtensilsCrossed className="w-4 h-4 text-amber-500" /> },
+  { id: "supermarket", label: "Groceries", icon: <ShoppingBasket className="w-4 h-4 text-blue-500" /> },
+  { id: "pharmacy", label: "Pharmacy", icon: <Pill className="w-4 h-4 text-rose-500" /> },
+  { id: "express", label: "Express Suya", icon: <Flame className="w-4 h-4 text-orange-500" /> },
 ];
 
 export default function CustomerHomePage() {
-  const { stores, products, cart, addToCart, setIsCartOpen } = usePlatform();
+  const { stores, products, cart, addToCart, setIsCartOpen, isAuthenticated } = usePlatform();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [deliveryLocation, setDeliveryLocation] = useState("Okpe Road, Sapele, Delta State");
+  const [deliveryLocation, setDeliveryLocation] = useState("14 Commercial Avenue, Central District");
   const [isLocating, setIsLocating] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Synchronized Slide & Text State
   const [activeSlide, setActiveSlide] = useState(0);
 
+  // Rider Bike Delivery Simulator State
+  const [bikeProgress, setBikeProgress] = useState(45);
+
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
     const slideInterval = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 3000);
+    }, 3200);
     return () => clearInterval(slideInterval);
+  }, []);
+
+  // Animate Express Rider Bike progress across track
+  useEffect(() => {
+    const bikeInterval = setInterval(() => {
+      setBikeProgress((prev) => (prev >= 100 ? 15 : prev + 1));
+    }, 250);
+    return () => clearInterval(bikeInterval);
   }, []);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);
     setTimeout(() => {
-      setDeliveryLocation("Olympia Cinema Area, Okpe Road, Sapele");
+      setDeliveryLocation("Marina Axis, Central Business District");
       setIsLocating(false);
     }, 800);
   };
@@ -84,7 +113,9 @@ export default function CustomerHomePage() {
     const matchesCategory = selectedCategory === "all" || store.category === selectedCategory;
     const matchesSearch =
       store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (store.cuisineType && store.cuisineType.toLowerCase().includes(searchQuery.toLowerCase()));
+      (store.cuisineType && store.cuisineType.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (store.city && store.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
@@ -98,29 +129,33 @@ export default function CustomerHomePage() {
   const currentSlide = HERO_SLIDES[activeSlide];
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 pb-16">
-      {/* 1. HERO BANNER WITH INTEGRATED TRANSPARENT HEADER & BOTTOM SVG WAVE */}
-      <section className="relative w-full bg-gradient-to-br from-[#0a4d3c] via-[#052a21] to-[#21150c] text-white overflow-hidden pb-28 sm:pb-36">
+    <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 font-sans">
+      {/* 1. VIBRANT EMERALD GREEN HERO BANNER (#087F5B) */}
+      <section className="relative w-full bg-gradient-to-b from-[#099268] via-[#087F5B] to-[#066347] text-white overflow-hidden pb-28 sm:pb-36">
         
+        {/* Multi-tone Ambient Lighting */}
+        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-white/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl pointer-events-none" />
+
         {/* INTEGRATED FULL HEADER INSIDE HERO BANNER */}
         <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-30">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-2xl select-none group-hover:scale-105 transition-transform">
+            <span className="text-3xl select-none group-hover:scale-110 transition-transform">
               🛍️
             </span>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tight text-white leading-none">
+              <span className="text-xl font-black tracking-tight text-white leading-none">
                 Novo
               </span>
-              <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest mt-0.5">
-                Delivery Service
+              <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest mt-0.5">
+                Delivery Express
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-2xl border border-white/15">
+          <nav className="hidden md:flex items-center gap-1 bg-white/15 backdrop-blur-lg px-4 py-1.5 rounded-2xl border border-white/20 shadow-inner">
             {[
               { label: "Home", href: "/" },
               { label: "Shop", href: "/shop" },
@@ -130,10 +165,10 @@ export default function CustomerHomePage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
                   item.href === "/"
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-200 hover:text-white hover:bg-white/15"
+                    ? "bg-white text-[#087F5B] shadow-lg font-black"
+                    : "text-white hover:bg-white/20"
                 }`}
               >
                 {item.label}
@@ -143,98 +178,83 @@ export default function CustomerHomePage() {
 
           {/* Header Action Controls */}
           <div className="flex items-center gap-3">
-            {/* Cart Drawer Trigger */}
+            <ThemeToggle />
+
+            {/* Cart Trigger */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-colors cursor-pointer"
+              className="relative p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white transition-all active:scale-95 cursor-pointer shadow-lg"
             >
-              <ShoppingBag className="w-5 h-5 text-emerald-300" />
+              <ShoppingBag className="w-5 h-5 text-emerald-200" />
               {totalCartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-sm animate-in zoom-in-50">
+                <span className="absolute -top-1 -right-1 bg-white text-[#087F5B] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#087F5B] shadow-md animate-in zoom-in-50">
                   {totalCartCount}
                 </span>
               )}
             </button>
 
             {/* Account / Login */}
-            <Link
-              href="/auth"
-              className="px-4 py-2 rounded-xl text-xs font-extrabold bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all active:scale-95 cursor-pointer"
-            >
-              Account
-            </Link>
+            {!isAuthenticated && (
+              <Link
+                href="/auth"
+                className="px-4 py-2 rounded-xl text-xs font-black bg-white text-[#087F5B] hover:bg-emerald-50 transition-all active:scale-95 cursor-pointer shadow-md"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </header>
 
-        {/* Dynamic Abstract Glow Shapes */}
-        <div className="absolute right-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -mr-24 -mb-24 pointer-events-none" />
-        <div className="absolute top-0 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Hero Content Grid */}
+        {/* HERO CONTENT GRID */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-4 sm:mt-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Column */}
           <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
-            {/* CONCISE SYNCHRONIZED HERO HEADLINE */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight min-h-[90px] sm:min-h-[110px]">
-              Get{" "}
-              <span
-                key={activeSlide}
-                className="text-emerald-400 inline-block animate-in fade-in slide-in-from-bottom-2 duration-500 underline decoration-emerald-500/40 underline-offset-8"
-              >
-                {currentSlide.text}
-              </span>{" "}
-              delivered.
-            </h1>
-
-            {/* CONCISE SUBTITLE */}
-            <p className="text-xs sm:text-sm text-slate-300 font-medium max-w-md">
-              Order food, groceries & pharmacy meds delivered fast.
-            </p>
-
-            {/* Location & Search Inputs */}
-            <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-3xl p-3 shadow-2xl border border-white/20 flex flex-col gap-2 text-slate-900 dark:text-slate-100 mt-2">
-              {/* Location Bar */}
-              <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full">
-                <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                <input
-                  type="text"
-                  value={deliveryLocation}
-                  onChange={(e) => setDeliveryLocation(e.target.value)}
-                  className="bg-transparent text-xs font-bold flex-1 outline-none text-slate-800 dark:text-slate-200"
-                  placeholder="Enter delivery address..."
-                />
-                <button
-                  onClick={handleUseMyLocation}
-                  className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-wider hover:underline ml-auto cursor-pointer"
+            
+            {/* DYNAMIC SYNCHRONIZED HERO HEADLINE MATCHING SLIDESHOW */}
+            <div className="flex flex-col gap-4 items-center lg:items-start">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight min-h-[100px] sm:min-h-[130px]">
+                <span
+                  key={activeSlide}
+                  className="inline-block animate-in fade-in slide-in-from-bottom-3 duration-500 text-white"
                 >
-                  {isLocating ? "Locating..." : "Locate"}
-                </button>
-              </div>
+                  {currentSlide.text}
+                </span>
+              </h1>
 
-              {/* Search Bar */}
-              <div className="relative flex-1 w-full flex items-center">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search FoodLAND, Pharmacy meds, Jollof, Milk..."
-                  className="w-full pl-9 pr-4 py-2.5 bg-transparent text-sm outline-none text-slate-900 dark:text-slate-100 font-medium"
-                />
-              </div>
+              <Link
+                href={`/shop?category=${currentSlide.category}`}
+                className="w-fit px-8 py-3.5 rounded-2xl bg-white text-[#087F5B] hover:bg-emerald-50 text-sm font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer"
+              >
+                <span>Order {currentSlide.text}</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
 
-          {/* Right Column: Borderless Media Showcase */}
+          {/* Right Column: Hero Media Showcase */}
           <div className="lg:col-span-6 flex flex-col items-center">
-            <div className="relative w-full max-w-xl lg:max-w-2xl h-80 sm:h-[420px] lg:h-[460px] rounded-3xl overflow-hidden shadow-2xl border-0 ring-0 outline-none group">
+            <div className="relative w-full max-w-xl lg:max-w-2xl h-80 sm:h-[420px] lg:h-[450px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group">
               <img
                 src={currentSlide.image}
                 alt={currentSlide.caption}
                 className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#043324]/90 via-transparent to-transparent" />
+              
+              {/* Slide Caption Card */}
+              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-[#087F5B]/85 backdrop-blur-md border border-white/20 flex items-center justify-between shadow-lg">
+                <div>
+                  <h4 className="text-sm font-black text-white">{currentSlide.caption}</h4>
+                  <span className="text-[11px] font-semibold text-emerald-200">Delivered hot &amp; fresh</span>
+                </div>
+                <Link
+                  href="/shop"
+                  className="p-2 rounded-xl bg-white text-[#087F5B] hover:bg-emerald-50 transition-colors shadow-sm"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Link>
+              </div>
             </div>
           </div>
 
@@ -243,7 +263,7 @@ export default function CustomerHomePage() {
         {/* ORGANIC SVG WAVE BOTTOM DIVIDER */}
         <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none z-10">
           <svg
-            className="relative block w-full h-12 sm:h-20 lg:h-28 text-slate-50 dark:text-slate-950"
+            className="relative block w-full h-12 sm:h-20 lg:h-24 text-slate-50 dark:text-slate-950"
             viewBox="0 0 1200 120"
             preserveAspectRatio="none"
             fill="currentColor"
@@ -253,40 +273,41 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 2. CLEAN CATEGORY PILLS */}
+      {/* 2. RICH CATEGORY BADGES WITH EMERALD GREEN HIGHLIGHT (#087F5B) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full relative z-20">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
                 selectedCategory === cat.id
-                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm"
+                  ? "bg-[#087F5B] text-white shadow-md ring-2 ring-[#087F5B]/50"
                   : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
             >
+              {cat.icon}
               <span>{cat.label}</span>
             </button>
           ))}
         </div>
       </section>
 
-      {/* 3. TOP SAPELE MERCHANTS (Glovo Larger Spreading Circles) */}
+      {/* 3. TOP FEATURED MERCHANTS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 w-full">
-        <div className="p-6 sm:p-8 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-emerald-50/80 dark:from-emerald-950/30 dark:via-slate-900 dark:to-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40 rounded-3xl shadow-xs">
+        <div className="p-6 sm:p-8 bg-gradient-to-r from-[#087F5B]/10 via-emerald-500/5 to-[#087F5B]/10 dark:from-emerald-950/40 dark:via-slate-900 dark:to-emerald-950/40 border border-[#087F5B]/20 rounded-3xl shadow-xs">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-                Top Sapele Merchants
+                Top Featured Merchants
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Popular stores and restaurants delivering near you.
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                Verified restaurants, supermarkets &amp; pharmacies near you.
               </p>
             </div>
             <Link
               href="/shop"
-              className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1 hover:underline"
+              className="text-xs font-black text-[#087F5B] dark:text-emerald-400 flex items-center gap-1 hover:underline"
             >
               <span>See All ({stores.length})</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -294,7 +315,7 @@ export default function CustomerHomePage() {
           </div>
 
           {filteredStores.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
+            <div className="p-8 text-center text-slate-500 text-xs font-semibold">
               No stores match your search query.
             </div>
           ) : (
@@ -305,15 +326,14 @@ export default function CustomerHomePage() {
                   href={`/shop?store=${store.id}`}
                   className="group flex flex-col items-center gap-3 shrink-0 cursor-pointer"
                 >
-                  {/* LARGER SPREAD OUT MERCHANT CIRCLE */}
-                  <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-2 border-emerald-500/80 p-1 bg-white dark:bg-slate-900 shadow-md group-hover:scale-105 group-hover:border-emerald-400 transition-all duration-300 overflow-hidden">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 rounded-full border-2 border-[#087F5B] p-1 bg-white dark:bg-slate-900 shadow-md group-hover:scale-105 group-hover:border-emerald-400 transition-all duration-300 overflow-hidden">
                     <img
                       src={store.logo}
                       alt={store.name}
                       className="w-full h-full object-cover rounded-full"
                     />
                   </div>
-                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors text-center line-clamp-1 max-w-[110px] sm:max-w-[125px]">
+                  <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-slate-100 group-hover:text-[#087F5B] dark:group-hover:text-emerald-400 transition-colors text-center line-clamp-1 max-w-[110px] sm:max-w-[125px]">
                     {store.name}
                   </span>
                 </Link>
@@ -323,7 +343,7 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 4. POPULAR DISHES & PRODUCTS (COMPLETELY BORDERLESS & SEAMLESS) */}
+      {/* 4. POPULAR DISHES & PRODUCTS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-14 w-full">
         <div className="flex flex-col gap-6">
           <div>
@@ -348,7 +368,94 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 5. LET'S DO IT TOGETHER SECTION (With Glovo Large Overlapping Circle Images) */}
+      {/* 5. DRIVER ETA TRACKER SECTION WITH RICH EMERALD GREEN ACCENTS (#087F5B) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 w-full">
+        <div className="bg-gradient-to-r from-[#054934] via-[#087F5B] to-[#043324] text-white rounded-3xl p-6 sm:p-10 shadow-xl flex flex-col md:flex-row items-center gap-8">
+          
+          {/* Left Side: Rider Fleet Image */}
+          <div className="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden relative shrink-0">
+            <img
+              src="/images/rider-bike.png"
+              alt="Novo Courier Fleet"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#043324]/80 via-transparent to-transparent pointer-events-none" />
+          </div>
+
+          {/* Right Side: Live Driver ETA System */}
+          <div className="w-full md:w-1/2 flex flex-col gap-5">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-emerald-200 text-xs font-black uppercase tracking-wider mb-1">
+                <Bike className="w-4 h-4" />
+                <span>Driver ETA Tracker</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                How far is your driver?
+              </h3>
+              <p className="text-xs text-emerald-100 mt-1 font-medium">
+                Select a distance to see estimated arrival time in real time.
+              </p>
+            </div>
+
+            {/* Distance Quick Buttons */}
+            <div className="flex items-center gap-2">
+              {[
+                { label: "Near (1.2 km)", progress: 75, eta: 4 },
+                { label: "Medium (2.8 km)", progress: 45, eta: 10 },
+                { label: "Far (4.5 km)", progress: 20, eta: 16 },
+              ].map((opt, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setBikeProgress(opt.progress)}
+                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    Math.abs(bikeProgress - opt.progress) < 15
+                      ? "bg-white text-[#087F5B] font-black shadow-md"
+                      : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Live Driver Status Box */}
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-white font-extrabold text-xs sm:text-sm">
+                  <span>🏍️ Status:</span>
+                  <span className="text-emerald-200 font-black">
+                    {bikeProgress < 35
+                      ? "Driver picking up package"
+                      : bikeProgress < 75
+                      ? "Driver on the move"
+                      : "Driver arriving soon!"}
+                  </span>
+                </div>
+                <span className="text-xs font-black text-[#087F5B] bg-white px-3 py-1 rounded-full shadow-sm">
+                  {Math.max(2, Math.round((100 - bikeProgress) / 6))} mins away
+                </span>
+              </div>
+
+              {/* Progress Track */}
+              <div className="relative w-full bg-black/20 rounded-full h-3 overflow-hidden border border-white/20">
+                <div
+                  className="bg-white h-full rounded-full transition-all duration-300 shadow-sm"
+                  style={{ width: `${bikeProgress}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-100">
+                <span>Store</span>
+                <span className="text-white font-black">{bikeProgress}% completed</span>
+                <span>Your Address</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* 6. PARTNER & CAREER OPPORTUNITIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 sm:mt-28 w-full">
         <div className="flex flex-col gap-14">
           <div className="text-center">
@@ -363,7 +470,6 @@ export default function CustomerHomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-8 pt-10">
             {/* Card 1: Become a rider */}
             <div className="group relative bg-white dark:bg-slate-900 rounded-3xl pt-16 px-8 pb-8 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center gap-6">
-              {/* Overlapping Circle Image */}
               <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-900 shadow-xl group-hover:scale-105 transition-transform duration-300 bg-amber-100 shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=600&q=80"
@@ -381,20 +487,16 @@ export default function CustomerHomePage() {
                 </p>
               </div>
 
-              <Link href="/auth?role=rider">
-                <Button
-                  variant="primary"
-                  className="rounded-full px-8 py-3 text-xs"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Register here
-                </Button>
+              <Link href="/rider">
+                <button className="px-8 py-3 rounded-full bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-md">
+                  <span>Register Here</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </Link>
             </div>
 
             {/* Card 2: Register your business */}
             <div className="group relative bg-white dark:bg-slate-900 rounded-3xl pt-16 px-8 pb-8 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center gap-6">
-              {/* Overlapping Circle Image */}
               <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-900 shadow-xl group-hover:scale-105 transition-transform duration-300 bg-emerald-100 shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=600&q=80"
@@ -408,24 +510,20 @@ export default function CustomerHomePage() {
                   Register your business
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-xs">
-                  Grow with Novo! Our technology and user base can help you boost sales and unlock new opportunities!
+                  Grow with Novo! Our delivery network and user base can help you boost sales and unlock new opportunities!
                 </p>
               </div>
 
-              <Link href="/auth?role=merchant">
-                <Button
-                  variant="primary"
-                  className="rounded-full px-8 py-3 text-xs"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Register here
-                </Button>
+              <Link href="/merchant/register">
+                <button className="px-8 py-3 rounded-full bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-md">
+                  <span>Register Here</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </Link>
             </div>
 
             {/* Card 3: Careers */}
             <div className="group relative bg-white dark:bg-slate-900 rounded-3xl pt-16 px-8 pb-8 border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-2xl transition-all duration-300 flex flex-col justify-between items-center text-center gap-6">
-              {/* Overlapping Circle Image */}
               <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-white dark:border-slate-900 shadow-xl group-hover:scale-105 transition-transform duration-300 bg-purple-100 shrink-0">
                 <img
                   src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
@@ -439,18 +537,15 @@ export default function CustomerHomePage() {
                   Careers
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-xs">
-                  Ready for an exciting new challenge? If you’re ambitious, humble, and love working with others, then we want to hear from you!
+                  Ready for an exciting new challenge? Join our ambitious, passionate team building the future of commerce!
                 </p>
               </div>
 
               <Link href="/auth">
-                <Button
-                  variant="primary"
-                  className="rounded-full px-8 py-3 text-xs"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Register here
-                </Button>
+                <button className="px-8 py-3 rounded-full bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-all flex items-center gap-2 cursor-pointer shadow-md">
+                  <span>Join Us</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </Link>
             </div>
           </div>
@@ -486,7 +581,7 @@ export default function CustomerHomePage() {
                     className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200"
                   >
                     <span>{opt.name}</span>
-                    <span className="text-emerald-600 font-bold">+₦{opt.price}</span>
+                    <span className="text-[#087F5B] font-bold">+₦{opt.price}</span>
                   </label>
                 ))}
               </div>
@@ -495,15 +590,15 @@ export default function CustomerHomePage() {
               <span className="text-lg font-black text-slate-900 dark:text-slate-100">
                 ₦{selectedProduct.price.toLocaleString()}
               </span>
-              <Button
-                variant="primary"
+              <button
                 onClick={() => {
                   addToCart(selectedProduct);
                   setSelectedProduct(null);
                 }}
+                className="px-6 py-2.5 rounded-xl bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-colors"
               >
                 Add to Order
-              </Button>
+              </button>
             </div>
           </div>
         )}
