@@ -70,13 +70,13 @@ function AuthContent() {
       if (isLogin) {
         // LOGIN VIA FASTAPI BACKEND
         const result = await apiService.login({ email, password });
-        if (result.access_token) {
+        if (result && result.access_token) {
           loginUser(result.access_token, email);
+          setSuccessMsg("Welcome back! Signing in to your portal...");
+          handleRouteRedirect("customer");
         } else {
-          loginUser("demo_token", email);
+          throw new Error("Invalid email or password");
         }
-        setSuccessMsg("Welcome back! Signing in to your portal...");
-        handleRouteRedirect("customer");
       } else {
         // SIGNUP VIA FASTAPI BACKEND AS CUSTOMER
         const result = await apiService.signUp({
