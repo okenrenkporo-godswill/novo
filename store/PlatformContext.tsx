@@ -14,6 +14,7 @@ import {
   Review,
 } from "@/types";
 import { INITIAL_STORES, INITIAL_PRODUCTS, INITIAL_RIDERS, INITIAL_ORDERS, apiService } from "@/services/api";
+import { getUniqueStoreBanner, getUniqueStoreLogo } from "@/utils/storeImageUtils";
 
 interface PlatformContextType {
   // Role & Auth State
@@ -210,8 +211,8 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             isVerified: true,
             status: "active",
             isOpening: bs.is_open ?? true,
-            banner: bs.banner || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
-            logo: bs.logo || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=200&q=80",
+            banner: getUniqueStoreBanner({ id: bs.id, name: bs.name, category: bs.store_type, banner: bs.banner }),
+            logo: getUniqueStoreLogo({ id: bs.id, name: bs.name, category: bs.store_type, logo: bs.logo }),
             deliveryFee: 450,
             deliveryTime: "20-30 min",
             minOrder: 1000,
@@ -271,9 +272,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Store management
   const addStore = (storeData: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">): Store => {
+    const newId = `store-${Date.now()}`;
     const newStore: Store = {
       ...storeData,
-      id: `store-${Date.now()}`,
+      id: newId,
+      banner: storeData.banner || getUniqueStoreBanner({ id: newId, name: storeData.name, category: storeData.category }),
+      logo: storeData.logo || getUniqueStoreLogo({ id: newId, name: storeData.name, category: storeData.category }),
       rating: 5.0,
       reviewCount: 0,
       isVerified: true,

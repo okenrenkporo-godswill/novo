@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { apiService } from "@/services/api";
+import { getUniqueStoreBanner } from "@/utils/storeImageUtils";
 
 export default function MerchantDashboardPage() {
   const { stores, activeStore, toggleStoreStatus } = usePlatform();
@@ -446,7 +447,7 @@ export default function MerchantDashboardPage() {
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col gap-4">
             <div className="h-36 w-full rounded-2xl overflow-hidden relative border border-slate-200/60 dark:border-slate-800">
               <img
-                src={currentStore?.banner || activeStore?.banner || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80"}
+                src={currentStore?.banner || (activeStore ? getUniqueStoreBanner(activeStore) : getUniqueStoreBanner({ id: "store-merchant", name: activeStoreName }))}
                 alt="Store Banner"
                 className="w-full h-full object-cover"
               />

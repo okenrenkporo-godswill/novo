@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Building2, Store, MapPin, Check, ArrowRight } from "lucide-react";
 import { apiService } from "@/services/api";
+import { getUniqueStoreBanner, getUniqueStoreLogo } from "@/utils/storeImageUtils";
 
 export default function MerchantRegisterPage() {
   const router = useRouter();
@@ -69,6 +70,8 @@ export default function MerchantRegisterPage() {
       const merch = await apiService.createMerchant({ name: businessName }, token);
       const merchantId = merch?.data?.id || merch?.id;
       if (merchantId) {
+        const uniqueBanner = getUniqueStoreBanner({ name: businessName, category: businessType });
+        const uniqueLogo = getUniqueStoreLogo({ name: businessName, category: businessType });
         await apiService.createStore(
           {
             merchantId,
@@ -76,6 +79,8 @@ export default function MerchantRegisterPage() {
             category: businessType as any,
             address,
             phone,
+            banner: uniqueBanner,
+            logo: uniqueLogo,
           } as any,
           token
         );

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star, Clock, Bike, ShieldCheck, Heart } from "lucide-react";
 import { Store } from "@/types";
 import { usePlatform } from "@/store/PlatformContext";
+import { getUniqueStoreBanner, getUniqueStoreLogo } from "@/utils/storeImageUtils";
 
 interface RestaurantCardProps {
   store: Store;
@@ -13,6 +14,9 @@ interface RestaurantCardProps {
 export const RestaurantCard: React.FC<RestaurantCardProps> = ({ store }) => {
   const { favorites, toggleFavorite } = usePlatform();
   const isFav = favorites.includes(store.id);
+
+  const bannerUrl = getUniqueStoreBanner(store);
+  const logoUrl = getUniqueStoreLogo(store);
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -28,7 +32,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ store }) => {
       {/* Banner & Badge */}
       <div className="relative h-44 w-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
         <img
-          src={store.banner}
+          src={bannerUrl}
           alt={store.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -57,7 +61,7 @@ export const RestaurantCard: React.FC<RestaurantCardProps> = ({ store }) => {
 
         {/* Store Logo */}
         <div className="absolute bottom-3 left-3 w-12 h-12 rounded-2xl border-2 border-white dark:border-slate-900 overflow-hidden bg-white shadow-md">
-          <img src={store.logo} alt={store.name} className="w-full h-full object-cover" />
+          <img src={logoUrl} alt={store.name} className="w-full h-full object-cover" />
         </div>
 
         {/* Cuisine Badge */}
