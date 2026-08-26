@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { apiService } from "@/services/api";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 
 export default function MerchantLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -149,17 +150,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
         <div>
           {/* LOGO AREA */}
           <div className="flex items-center justify-between pb-6 mb-2">
-            <Link href="/merchant" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-[#087F5B] flex items-center justify-center text-white shadow-md shadow-[#087F5B]/20">
-                <span className="text-xl">🍴</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-black text-slate-900 dark:text-white leading-none tracking-tight">
-                  NovoEats
-                </span>
-                <span className="text-[11px] font-semibold text-slate-400 mt-0.5">Merchant</span>
-              </div>
-            </Link>
+            <NovoLogo subtitle="Merchant Portal" size="md" href="/merchant" />
 
             <button
               onClick={() => setMobileMenuOpen(false)}

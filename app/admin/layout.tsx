@@ -13,6 +13,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 
+import { NovoLogo } from "@/components/shared/NovoLogo";
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -28,16 +30,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen w-full flex bg-slate-100 dark:bg-slate-950">
       {/* LEFT ADMIN SIDEBAR */}
       <aside className="hidden lg:flex flex-col w-64 bg-slate-950 text-white border-r border-slate-800 shrink-0">
-        <div className="p-6 border-b border-slate-800 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center text-white font-black shadow-md">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <div className="flex flex-col">
-            <h3 className="font-black text-sm text-white">Novo Admin</h3>
-            <span className="text-[10px] text-purple-400 font-bold uppercase tracking-wider">
-              Control Center
-            </span>
-          </div>
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <NovoLogo variant="white" subtitle="Admin Control" size="md" href="/admin" />
         </div>
 
         <nav className="flex-1 p-4 flex flex-col gap-1.5">

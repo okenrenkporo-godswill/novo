@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, ArrowRight, ShieldCheck } from "lucide-react";
 import { apiService } from "@/services/api";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 
 export default function MerchantLoginPage() {
   const router = useRouter();
@@ -59,11 +60,9 @@ export default function MerchantLoginPage() {
     <div className="min-h-screen bg-[#F8FAF9] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans text-[#17201D]">
       <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800 flex flex-col gap-6">
         {/* LOGO */}
-        <div className="flex flex-col items-center text-center gap-2">
-          <div className="w-12 h-12 rounded-2xl bg-[#087F5B] flex items-center justify-center text-white text-xl shadow-md shadow-[#087F5B]/20">
-            🍴
-          </div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">NovoEats Merchant Portal</h2>
+        <div className="flex flex-col items-center text-center gap-3">
+          <NovoLogo subtitle="Merchant Portal" size="lg" href="/merchant" />
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">Merchant Portal Sign In</h2>
           <p className="text-xs text-[#66736E] dark:text-slate-400">Sign in to manage your store, orders & earnings</p>
         </div>
 

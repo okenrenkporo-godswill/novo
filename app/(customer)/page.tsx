@@ -26,6 +26,7 @@ import { ProductCard } from "@/components/cards/ProductCard";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 import { Product } from "@/types";
 
 const HERO_SLIDES = [
@@ -140,19 +141,7 @@ export default function CustomerHomePage() {
         {/* INTEGRATED FULL HEADER INSIDE HERO BANNER */}
         <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-30">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-3xl select-none group-hover:scale-110 transition-transform">
-              🛍️
-            </span>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-white leading-none">
-                Novo
-              </span>
-              <span className="text-[9px] font-black text-emerald-200 uppercase tracking-widest mt-0.5">
-                Delivery Express
-              </span>
-            </div>
-          </Link>
+          <NovoLogo variant="white" subtitle="Delivery Express" size="md" />
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1 bg-white/15 backdrop-blur-lg px-4 py-1.5 rounded-2xl border border-white/20 shadow-inner">
@@ -575,7 +564,7 @@ export default function CustomerHomePage() {
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   Select Add-ons
                 </span>
-                {selectedProduct.options.map((opt) => (
+                {selectedProduct.options.map((opt: any) => (
                   <label
                     key={opt.id}
                     className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200"

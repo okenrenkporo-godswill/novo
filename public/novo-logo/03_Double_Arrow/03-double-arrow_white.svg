@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Novo — The Double Arrow</title>
+  <path d="M60,50 A70,70 0 0 1 150,75" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round"/>
+  <polygon points="130,45 172,72 128,92" fill="#FFFFFF"/>
+  <path d="M140,150 A70,70 0 0 1 50,125" fill="none" stroke="#FFFFFF" stroke-width="26" stroke-linecap="round"/>
+  <polygon points="70,155 28,128 72,108" fill="#FFFFFF"/>
+</svg>

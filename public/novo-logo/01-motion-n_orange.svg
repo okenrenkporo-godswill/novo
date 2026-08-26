@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Novo — The Motion N</title>
+  <path d="M50,168 L50,82 A32,32 0 0 1 112,82 L112,140" fill="none" stroke="#FF6B00" stroke-width="32" stroke-linecap="round"/>
+  <polygon points="96,108 172,140 96,172" fill="#FF6B00"/>
+</svg>

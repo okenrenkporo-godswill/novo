@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Building2, Store, MapPin, Check, ArrowRight } from "lucide-react";
 import { apiService } from "@/services/api";
 import { getUniqueStoreBanner, getUniqueStoreLogo } from "@/utils/storeImageUtils";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 
 export default function MerchantRegisterPage() {
   const router = useRouter();
@@ -105,11 +106,9 @@ export default function MerchantRegisterPage() {
   return (
     <div className="min-h-screen bg-[#F8FAF9] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans text-[#17201D] dark:text-slate-100">
       <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800 flex flex-col gap-6">
-        <div className="flex flex-col items-center text-center gap-2">
-          <div className="w-12 h-12 rounded-2xl bg-[#087F5B] flex items-center justify-center text-white text-xl shadow-md">
-            🍴
-          </div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">Partner with NovoEats</h2>
+        <div className="flex flex-col items-center text-center gap-3">
+          <NovoLogo subtitle="Merchant Registration" size="lg" href="/merchant" />
+          <h2 className="text-xl font-black text-slate-900 dark:text-white">Partner with Novo</h2>
           <p className="text-xs text-[#66736E] dark:text-slate-400">Register your business & start receiving customer orders</p>
         </div>
 

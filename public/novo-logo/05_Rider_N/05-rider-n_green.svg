@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <title>Novo — Rider Concept</title>
+  <line x1="52" y1="168" x2="52" y2="60" stroke="#00C853" stroke-width="28" stroke-linecap="round"/>
+  <line x1="52" y1="72" x2="148" y2="156" stroke="#00C853" stroke-width="28" stroke-linecap="round"/>
+  <line x1="148" y1="168" x2="148" y2="60" stroke="#00C853" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="148" cy="42" r="24" fill="#00C853"/>
+</svg>

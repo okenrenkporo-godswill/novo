@@ -12,6 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { UserRole } from "@/types";
@@ -107,10 +108,8 @@ function AuthContent() {
   return (
     <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-6">
       {/* LOGO & TITLE */}
-      <div className="flex flex-col items-center text-center gap-2">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-emerald-500/20">
-          🛍️
-        </div>
+      <div className="flex flex-col items-center text-center gap-3">
+        <NovoLogo subtitle="Delivery Express" size="lg" />
         <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
           {isOtpStep
             ? "Verify Email OTP"

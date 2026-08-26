@@ -4,6 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { Globe, ChevronDown } from "lucide-react";
 
+import { NovoLogo } from "@/components/shared/NovoLogo";
+
 export function Footer() {
   return (
     <footer className="w-full bg-[#051d16] text-slate-300 relative overflow-hidden">
@@ -23,19 +25,7 @@ export function Footer() {
         
         {/* Brand Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-10 border-b border-emerald-900/40">
-          <Link href="/" className="flex items-center gap-3 group">
-            <span className="text-3xl select-none group-hover:scale-105 transition-transform">
-              🛍️
-            </span>
-            <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-white leading-none">
-                Novo
-              </span>
-              <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mt-1">
-                Delivery Express
-              </span>
-            </div>
-          </Link>
+          <NovoLogo variant="white" subtitle="Delivery Express" size="lg" />
 
           {/* Language Picker Pill */}
           <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-white/10 border border-white/15 text-xs font-extrabold text-white cursor-pointer hover:bg-white/20 transition-all">

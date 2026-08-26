@@ -11,6 +11,8 @@ import { NotificationBell } from "@/components/shared/NotificationBell";
 import { SupportChatWidget } from "@/components/shared/SupportChatWidget";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
+import { NovoLogo } from "@/components/shared/NovoLogo";
+
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
 }
@@ -51,19 +53,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
         <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 border-b border-slate-200/80 dark:border-slate-800/80 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-2xl select-none group-hover:scale-105 transition-transform">
-                🛍️
-              </span>
-              <div className="flex flex-col">
-                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white leading-none">
-                  Novo
-                </span>
-                <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mt-0.5">
-                  Delivery Express
-                </span>
-              </div>
-            </Link>
+            <NovoLogo subtitle="Delivery Express" size="md" />
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
