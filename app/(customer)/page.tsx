@@ -109,8 +109,8 @@ export default function CustomerHomePage() {
     }, 800);
   };
 
-  // Filter stores
-  const filteredStores = stores.filter((store) => {
+  // Filter stores & deduplicate by store.id to prevent non-unique React key warnings
+  const rawFilteredStores = stores.filter((store) => {
     const matchesCategory = selectedCategory === "all" || store.category === selectedCategory;
     const matchesSearch =
       store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -120,12 +120,23 @@ export default function CustomerHomePage() {
     return matchesCategory && matchesSearch;
   });
 
-  // Filter featured products
-  const featuredProducts = products.filter(
+  const filteredStoresMap = new Map<string, typeof stores[0]>();
+  rawFilteredStores.forEach((s) => {
+    if (s && s.id) filteredStoresMap.set(s.id, s);
+  });
+  const filteredStores = Array.from(filteredStoresMap.values());
+
+  // Filter featured products & deduplicate by product.id
+  const rawFeaturedProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const featuredProductsMap = new Map<string, typeof products[0]>();
+  rawFeaturedProducts.forEach((p) => {
+    if (p && p.id) featuredProductsMap.set(p.id, p);
+  });
+  const featuredProducts = Array.from(featuredProductsMap.values());
 
   const currentSlide = HERO_SLIDES[activeSlide];
 

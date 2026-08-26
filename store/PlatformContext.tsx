@@ -180,8 +180,20 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.stores) setStores(parsed.stores);
-        if (parsed.products) setProducts(parsed.products);
+        if (parsed.stores && Array.isArray(parsed.stores)) {
+          const map = new Map<string, Store>();
+          parsed.stores.forEach((s: Store) => {
+            if (s && s.id) map.set(s.id, s);
+          });
+          setStores(Array.from(map.values()));
+        }
+        if (parsed.products && Array.isArray(parsed.products)) {
+          const map = new Map<string, Product>();
+          parsed.products.forEach((p: Product) => {
+            if (p && p.id) map.set(p.id, p);
+          });
+          setProducts(Array.from(map.values()));
+        }
         if (parsed.orders) setOrders(parsed.orders);
         if (parsed.cart) setCart(parsed.cart);
         if (parsed.riderProfile) setRiderProfile(parsed.riderProfile);
@@ -200,20 +212,25 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           const profile = JSON.parse(rawProfile);
           if (profile.businessName) {
             const storeSlug = profile.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            const existingStore = stores.find(
-              (s) =>
-                s.name.toLowerCase() === profile.businessName.toLowerCase() ||
-                s.slug === storeSlug ||
-                (profile.id && s.id === profile.id)
-            );
+            const targetId = profile.id || `store-${storeSlug}`;
 
-            if (existingStore) {
-              if (activeStoreId !== existingStore.id) {
-                setActiveStoreId(existingStore.id);
+            setStores((prev) => {
+              const map = new Map<string, Store>();
+              prev.forEach((s) => map.set(s.id, s));
+
+              const existing = prev.find(
+                (s) =>
+                  s.id === targetId ||
+                  s.name.toLowerCase() === profile.businessName.toLowerCase() ||
+                  s.slug === storeSlug
+              );
+
+              if (existing) {
+                return Array.from(map.values());
               }
-            } else {
+
               const newMerchantStore: Store = {
-                id: `store-${storeSlug}`,
+                id: targetId,
                 name: profile.businessName,
                 slug: storeSlug,
                 description: `${profile.businessName} - Quality food, drinks & fast delivery`,
@@ -233,16 +250,18 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 cuisineType: profile.businessType || "Restaurant",
               };
 
-              setStores((prev) => [newMerchantStore, ...prev]);
-              setActiveStoreId(newMerchantStore.id);
-            }
+              map.set(newMerchantStore.id, newMerchantStore);
+              return Array.from(map.values());
+            });
+
+            setActiveStoreId(targetId);
           }
         } catch (e) {
           console.warn("Failed to sync merchant store profile:", e);
         }
       }
     }
-  }, [stores, activeStoreId]);
+  }, []);
 
   // Fetch backend stores and products on mount so new stores appear live for customers
   useEffect(() => {
