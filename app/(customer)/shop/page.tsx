@@ -11,10 +11,17 @@ import { Product } from "@/types";
 
 function ShopContent() {
   const searchParams = useSearchParams();
-  const storeId = searchParams.get("store") || "store-1";
+  const storeParam = searchParams.get("store") || "store-1";
   const { stores, products, addToCart } = usePlatform();
 
-  const store = stores.find((s) => s.id === storeId) || stores[0];
+  const store =
+    stores.find(
+      (s) =>
+        s.id === storeParam ||
+        s.slug === storeParam ||
+        s.name.toLowerCase() === storeParam.toLowerCase()
+    ) || stores[0];
+
   const storeProducts = products.filter((p) => p.storeId === store.id);
 
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -105,7 +112,9 @@ function ShopContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 w-full">
         {filteredProducts.length === 0 ? (
           <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 font-medium">
-            No products found matching &quot;{searchQuery}&quot;.
+            {storeProducts.length === 0
+              ? `No menu items have been added to ${store.name} yet. Check back soon!`
+              : `No products found matching "${searchQuery}".`}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

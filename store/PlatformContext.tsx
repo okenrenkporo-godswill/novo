@@ -191,6 +191,59 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
+  // Synchronize authenticated merchant profile store into stores state & set activeStoreId
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const rawProfile = localStorage.getItem("merchant_profile");
+      if (rawProfile) {
+        try {
+          const profile = JSON.parse(rawProfile);
+          if (profile.businessName) {
+            const storeSlug = profile.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const existingStore = stores.find(
+              (s) =>
+                s.name.toLowerCase() === profile.businessName.toLowerCase() ||
+                s.slug === storeSlug ||
+                (profile.id && s.id === profile.id)
+            );
+
+            if (existingStore) {
+              if (activeStoreId !== existingStore.id) {
+                setActiveStoreId(existingStore.id);
+              }
+            } else {
+              const newMerchantStore: Store = {
+                id: `store-${storeSlug}`,
+                name: profile.businessName,
+                slug: storeSlug,
+                description: `${profile.businessName} - Quality food, drinks & fast delivery`,
+                logo: getUniqueStoreLogo({ name: profile.businessName, category: profile.businessType }),
+                banner: getUniqueStoreBanner({ name: profile.businessName, category: profile.businessType }),
+                category: (profile.businessType || "restaurant").toLowerCase() as any,
+                address: profile.address || "Central District",
+                phone: profile.phone || "+234 800 000 0000",
+                rating: 5.0,
+                reviewCount: 0,
+                deliveryFee: 450,
+                deliveryTime: "20-30 min",
+                minOrder: 1000,
+                isOpening: true,
+                isVerified: true,
+                status: "active",
+                cuisineType: profile.businessType || "Restaurant",
+              };
+
+              setStores((prev) => [newMerchantStore, ...prev]);
+              setActiveStoreId(newMerchantStore.id);
+            }
+          }
+        } catch (e) {
+          console.warn("Failed to sync merchant store profile:", e);
+        }
+      }
+    }
+  }, [stores, activeStoreId]);
+
   // Fetch backend stores and products on mount so new stores appear live for customers
   useEffect(() => {
     async function loadBackendStoresAndProducts() {

@@ -16,9 +16,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onSelectProduct,
 }) => {
-  const { favorites, toggleFavorite } = usePlatform();
+  const { favorites, toggleFavorite, stores } = usePlatform();
   const [added, setAdded] = useState(false);
   const isFav = favorites.includes(product.id);
+  const store = stores.find((s) => s.id === product.storeId);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -65,12 +66,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Borderless Info Column */}
       <div className="flex flex-col justify-between flex-1 min-w-0 h-full py-0.5 gap-1">
         <div>
-          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
-            {product.name}
-          </h4>
+          <div className="flex items-center justify-between gap-1">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-tight">
+              {product.name}
+            </h4>
+          </div>
           <p className="text-[11px] text-slate-400 dark:text-slate-500 line-clamp-1 mt-0.5 font-normal">
             {product.description}
           </p>
+          {store && (
+            <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-[#087F5B] dark:text-emerald-300 text-[10px] font-bold">
+              {store.name}
+            </span>
+          )}
         </div>
 
         {/* Borderless Price & Add Control */}
