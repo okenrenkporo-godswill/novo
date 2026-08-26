@@ -42,7 +42,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
         <img
           src={product.image}
-          alt={product.name}
+          alt=""
+          aria-hidden="true"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
 
