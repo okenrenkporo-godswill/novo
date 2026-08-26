@@ -126,7 +126,7 @@ export default function CustomerHomePage() {
   });
   const filteredStores = Array.from(filteredStoresMap.values());
 
-  // Filter featured products & deduplicate by product.id
+  // Filter featured products & deduplicate by storeId + product.name
   const rawFeaturedProducts = products.filter(
     (p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -134,7 +134,12 @@ export default function CustomerHomePage() {
   );
   const featuredProductsMap = new Map<string, typeof products[0]>();
   rawFeaturedProducts.forEach((p) => {
-    if (p && p.id) featuredProductsMap.set(p.id, p);
+    if (p && p.name) {
+      const key = `${p.storeId || ""}_${p.name.toLowerCase().trim()}`;
+      if (!featuredProductsMap.has(key)) {
+        featuredProductsMap.set(key, p);
+      }
+    }
   });
   const featuredProducts = Array.from(featuredProductsMap.values());
 

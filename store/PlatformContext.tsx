@@ -190,7 +190,10 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (parsed.products && Array.isArray(parsed.products)) {
           const map = new Map<string, Product>();
           parsed.products.forEach((p: Product) => {
-            if (p && p.id) map.set(p.id, p);
+            if (p && p.name) {
+              const key = `${p.storeId || ""}_${p.name.toLowerCase().trim()}`;
+              if (!map.has(key)) map.set(key, p);
+            }
           });
           setProducts(Array.from(map.values()));
         }
@@ -315,9 +318,13 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           }));
           setProducts((prev) => {
             const map = new Map<string, Product>();
-            formattedProducts.forEach((p) => map.set(p.id, p));
+            formattedProducts.forEach((p) => {
+              const key = `${p.storeId || ""}_${p.name.toLowerCase().trim()}`;
+              if (!map.has(key)) map.set(key, p);
+            });
             prev.forEach((p) => {
-              if (!map.has(p.id)) map.set(p.id, p);
+              const key = `${p.storeId || ""}_${p.name.toLowerCase().trim()}`;
+              if (!map.has(key)) map.set(key, p);
             });
             return Array.from(map.values());
           });
