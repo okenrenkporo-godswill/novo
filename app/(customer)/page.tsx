@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   MapPin,
@@ -19,6 +19,8 @@ import {
   Flame,
   Star,
   ChevronRight,
+  Store as StoreIcon,
+  PlusCircle,
 } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { RestaurantCard } from "@/components/cards/RestaurantCard";
@@ -29,121 +31,130 @@ import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { NovoLogo } from "@/components/shared/NovoLogo";
 import { Product } from "@/types";
 
-const HERO_SLIDES = [
-  {
-    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=80",
-    text: "Fast Food 🍲",
-    caption: "Hot Delicious Meals & Fast Delivery",
-    category: "restaurant",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&w=1000&q=80",
-    text: "Pharmacy 💊",
-    caption: "Essential Healthcare & Prescription Meds",
-    category: "pharmacy",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80",
-    text: "Traditional Soups 🍲",
-    caption: "Homestyle Authentic Nigerian Meals",
-    category: "restaurant",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1000&q=80",
-    text: "Fresh Groceries 🛍️",
-    caption: "Supermarket Household Essentials",
-    category: "supermarket",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=1000&q=80",
-    text: "Express Suya 🍢",
-    caption: "Sizzling Nighttime Grills & Finger Food",
-    category: "express",
-  },
-];
-
-const CATEGORIES = [
-  { id: "all", label: "All Stores", icon: <ShoppingBag className="w-4 h-4 text-emerald-500" /> },
-  { id: "restaurant", label: "Restaurants", icon: <UtensilsCrossed className="w-4 h-4 text-amber-500" /> },
-  { id: "supermarket", label: "Groceries", icon: <ShoppingBasket className="w-4 h-4 text-blue-500" /> },
-  { id: "pharmacy", label: "Pharmacy", icon: <Pill className="w-4 h-4 text-rose-500" /> },
-  { id: "express", label: "Express Suya", icon: <Flame className="w-4 h-4 text-orange-500" /> },
-];
-
 export default function CustomerHomePage() {
-  const { stores, products, cart, addToCart, setIsCartOpen, isAuthenticated } = usePlatform();
+  const { stores, products, cart, addToCart, setIsCartOpen, isAuthenticated, currentUser, activeOrder } = usePlatform();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [deliveryLocation, setDeliveryLocation] = useState("14 Commercial Avenue, Central District");
+  const [deliveryLocation, setDeliveryLocation] = useState(currentUser?.address || "Set Delivery Location");
   const [isLocating, setIsLocating] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Synchronized Slide & Text State
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Rider Bike Delivery Simulator State
+  // Rider Bike Delivery Simulator / Active Order Tracker State
   const [bikeProgress, setBikeProgress] = useState(45);
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // Update delivery location when currentUser address changes
   useEffect(() => {
+    if (currentUser?.address) {
+      setDeliveryLocation(currentUser.address);
+    }
+  }, [currentUser?.address]);
+
+  // Dynamically generate Hero Slides from live backend stores or verified categories
+  const heroSlides = useMemo(() => {
+    if (stores.length > 0) {
+      return stores.slice(0, 5).map((s) => ({
+        image: s.banner || s.logo || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=80",
+        text: s.name,
+        caption: s.description || `${s.name} - Quality items & fast delivery`,
+        category: s.category || "all",
+        href: `/shop?store=${s.id}`,
+      }));
+    }
+    return [
+      {
+        image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=80",
+        text: "Fresh & Fast Commerce",
+        caption: "Connect with top verified merchants and on-demand courier delivery",
+        category: "all",
+        href: "/shop",
+      },
+    ];
+  }, [stores]);
+
+  useEffect(() => {
+    if (heroSlides.length <= 1) return;
     const slideInterval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 3200);
+      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 3500);
     return () => clearInterval(slideInterval);
-  }, []);
+  }, [heroSlides.length]);
 
   // Animate Express Rider Bike progress across track
   useEffect(() => {
     const bikeInterval = setInterval(() => {
       setBikeProgress((prev) => (prev >= 100 ? 15 : prev + 1));
-    }, 250);
+    }, 300);
     return () => clearInterval(bikeInterval);
   }, []);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);
-    setTimeout(() => {
-      setDeliveryLocation("Marina Axis, Central Business District");
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setDeliveryLocation(`Lat: ${pos.coords.latitude.toFixed(4)}, Long: ${pos.coords.longitude.toFixed(4)}`);
+          setIsLocating(false);
+        },
+        () => {
+          setDeliveryLocation("Current Location");
+          setIsLocating(false);
+        }
+      );
+    } else {
       setIsLocating(false);
-    }, 800);
+    }
   };
 
-  // Filter stores & deduplicate by store.id to prevent non-unique React key warnings
-  const rawFilteredStores = stores.filter((store) => {
-    const matchesCategory = selectedCategory === "all" || store.category === selectedCategory;
-    const matchesSearch =
-      store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (store.cuisineType && store.cuisineType.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (store.city && store.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchesCategory && matchesSearch;
-  });
+  // Dynamic Categories derived from backend stores
+  const categories = useMemo(() => {
+    const defaultCats = [
+      { id: "all", label: "All Stores", icon: <ShoppingBag className="w-4 h-4 text-emerald-500" /> },
+    ];
+    const uniqueCategories = Array.from(new Set(stores.map((s) => s.category).filter(Boolean)));
+    const dynamicCats = uniqueCategories.map((cat) => {
+      let icon = <ShoppingBag className="w-4 h-4 text-emerald-500" />;
+      const c = String(cat).toLowerCase();
+      if (c === "restaurant" || c === "food") icon = <UtensilsCrossed className="w-4 h-4 text-amber-500" />;
+      else if (c === "supermarket" || c === "groceries") icon = <ShoppingBasket className="w-4 h-4 text-blue-500" />;
+      else if (c === "pharmacy" || c === "health") icon = <Pill className="w-4 h-4 text-rose-500" />;
+      else if (c === "express" || c === "grills") icon = <Flame className="w-4 h-4 text-orange-500" />;
+      return {
+        id: cat,
+        label: String(cat).charAt(0).toUpperCase() + String(cat).slice(1),
+        icon,
+      };
+    });
+    return [...defaultCats, ...dynamicCats];
+  }, [stores]);
 
-  const filteredStoresMap = new Map<string, typeof stores[0]>();
-  rawFilteredStores.forEach((s) => {
-    if (s && s.id) filteredStoresMap.set(s.id, s);
-  });
-  const filteredStores = Array.from(filteredStoresMap.values());
+  // Filter stores & deduplicate by store.id
+  const filteredStores = useMemo(() => {
+    return stores.filter((store) => {
+      const matchesCategory = selectedCategory === "all" || store.category === selectedCategory;
+      const matchesSearch =
+        store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (store.cuisineType && store.cuisineType.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (store.city && store.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (store.address && store.address.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [stores, selectedCategory, searchQuery]);
 
-  // Filter featured products & deduplicate strictly by product name to eliminate duplicate dishes
-  const rawFeaturedProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  const featuredProductsMap = new Map<string, typeof products[0]>();
-  rawFeaturedProducts.forEach((p) => {
-    if (p && p.name) {
-      const nameKey = p.name.toLowerCase().trim();
-      if (!featuredProductsMap.has(nameKey)) {
-        featuredProductsMap.set(nameKey, p);
-      }
-    }
-  });
-  const featuredProducts = Array.from(featuredProductsMap.values());
+  // Filter products by search query
+  const featuredProducts = useMemo(() => {
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [products, searchQuery]);
 
-  const currentSlide = HERO_SLIDES[activeSlide];
+  const currentSlide = heroSlides[activeSlide] || heroSlides[0];
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 font-sans">
@@ -199,12 +210,19 @@ export default function CustomerHomePage() {
             </button>
 
             {/* Account / Login */}
-            {!isAuthenticated && (
+            {!isAuthenticated ? (
               <Link
                 href="/auth"
                 className="px-4 py-2 rounded-xl text-xs font-black bg-white text-[#087F5B] hover:bg-emerald-50 transition-all active:scale-95 cursor-pointer shadow-md"
               >
                 Sign In
+              </Link>
+            ) : (
+              <Link
+                href="/profile"
+                className="px-4 py-2 rounded-xl text-xs font-black bg-white/20 hover:bg-white/30 text-white border border-white/30 transition-all active:scale-95 cursor-pointer shadow-md"
+              >
+                {currentUser?.name || "Account"}
               </Link>
             )}
           </div>
@@ -216,7 +234,7 @@ export default function CustomerHomePage() {
           {/* Left Column */}
           <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
             
-            {/* DYNAMIC SYNCHRONIZED HERO HEADLINE MATCHING SLIDESHOW */}
+            {/* DYNAMIC SYNCHRONIZED HERO HEADLINE MATCHING BACKEND DATA */}
             <div className="flex flex-col gap-4 items-center lg:items-start">
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight min-h-[100px] sm:min-h-[130px]">
                 <span
@@ -227,11 +245,15 @@ export default function CustomerHomePage() {
                 </span>
               </h1>
 
+              <p className="text-sm sm:text-base text-emerald-100 font-medium max-w-md">
+                {currentSlide.caption}
+              </p>
+
               <Link
-                href={`/shop?category=${currentSlide.category}`}
-                className="w-fit px-8 py-3.5 rounded-2xl bg-white text-[#087F5B] hover:bg-emerald-50 text-sm font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer"
+                href={currentSlide.href || `/shop?category=${currentSlide.category}`}
+                className="w-fit px-8 py-3.5 rounded-2xl bg-white text-[#087F5B] hover:bg-emerald-50 text-sm font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer mt-2"
               >
-                <span>Order {currentSlide.text}</span>
+                <span>Explore Store &amp; Order</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -250,12 +272,12 @@ export default function CustomerHomePage() {
               {/* Slide Caption Card */}
               <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-[#087F5B]/85 backdrop-blur-md border border-white/20 flex items-center justify-between shadow-lg">
                 <div>
-                  <h4 className="text-sm font-black text-white">{currentSlide.caption}</h4>
-                  <span className="text-[11px] font-semibold text-emerald-200">Delivered hot &amp; fresh</span>
+                  <h4 className="text-sm font-black text-white">{currentSlide.text}</h4>
+                  <span className="text-[11px] font-semibold text-emerald-200">{currentSlide.caption}</span>
                 </div>
                 <Link
-                  href="/shop"
-                  className="p-2 rounded-xl bg-white text-[#087F5B] hover:bg-emerald-50 transition-colors shadow-sm"
+                  href={currentSlide.href || "/shop"}
+                  className="p-2 rounded-xl bg-white text-[#087F5B] hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </Link>
@@ -278,10 +300,10 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 2. RICH CATEGORY BADGES WITH EMERALD GREEN HIGHLIGHT (#087F5B) */}
+      {/* 2. DYNAMIC CATEGORY BADGES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full relative z-20">
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
@@ -298,7 +320,7 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 3. TOP FEATURED MERCHANTS */}
+      {/* 3. TOP FEATURED MERCHANTS (DIRECT FROM BACKEND) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 w-full">
         <div className="p-6 sm:p-8 bg-gradient-to-r from-[#087F5B]/10 via-emerald-500/5 to-[#087F5B]/10 dark:from-emerald-950/40 dark:via-slate-900 dark:to-emerald-950/40 border border-[#087F5B]/20 rounded-3xl shadow-xs">
           <div className="flex items-center justify-between mb-6">
@@ -312,7 +334,7 @@ export default function CustomerHomePage() {
             </div>
             <Link
               href="/shop"
-              className="text-xs font-black text-[#087F5B] dark:text-emerald-400 flex items-center gap-1 hover:underline"
+              className="text-xs font-black text-[#087F5B] dark:text-emerald-400 flex items-center gap-1 hover:underline cursor-pointer"
             >
               <span>See All ({stores.length})</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -320,8 +342,21 @@ export default function CustomerHomePage() {
           </div>
 
           {filteredStores.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs font-semibold">
-              No stores match your search query.
+            <div className="p-10 flex flex-col items-center justify-center text-center gap-3 bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800">
+              <StoreIcon className="w-10 h-10 text-slate-400 dark:text-slate-600" />
+              <div className="flex flex-col gap-1">
+                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">No Stores Available Yet</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                  Stores created by merchants will automatically appear here live from the backend.
+                </p>
+              </div>
+              <Link
+                href="/merchant/register"
+                className="mt-2 px-5 py-2 rounded-xl bg-[#087F5B] text-white text-xs font-bold hover:bg-[#065f44] transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span>Register Store</span>
+              </Link>
             </div>
           ) : (
             <div className="flex items-center gap-8 sm:gap-10 lg:gap-12 overflow-x-auto pb-4 pt-2 scrollbar-none">
@@ -348,32 +383,55 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 4. POPULAR DISHES & PRODUCTS */}
+      {/* 4. POPULAR DISHES & PRODUCTS (DIRECT FROM BACKEND) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-14 w-full">
         <div className="flex flex-col gap-6">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-              Popular Dishes &amp; Products
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-              Directly add items to your cart for instant checkout.
-            </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                Popular Dishes &amp; Products
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                Directly add items to your cart for instant checkout.
+              </p>
+            </div>
+            {products.length > 0 && (
+              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                {featuredProducts.length} Items Live
+              </span>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {featuredProducts.map((prod) => (
-              <ProductCard
-                key={prod.id}
-                product={prod}
-                onAddToCart={addToCart}
-                onSelectProduct={setSelectedProduct}
-              />
-            ))}
-          </div>
+          {featuredProducts.length === 0 ? (
+            <div className="p-12 flex flex-col items-center justify-center text-center gap-3 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 shadow-xs">
+              <ShoppingBasket className="w-12 h-12 text-slate-400 dark:text-slate-600" />
+              <h4 className="text-base font-bold text-slate-800 dark:text-slate-200">Catalog Empty</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                Products added by store merchants will show up here in real time.
+              </p>
+              <Link
+                href="/shop"
+                className="mt-2 px-6 py-2.5 rounded-xl bg-[#087F5B] text-white text-xs font-bold hover:bg-[#065f44] transition-all shadow-sm"
+              >
+                Browse All Stores
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+              {featuredProducts.map((prod) => (
+                <ProductCard
+                  key={prod.id}
+                  product={prod}
+                  onAddToCart={addToCart}
+                  onSelectProduct={setSelectedProduct}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* 5. DRIVER ETA TRACKER SECTION WITH RICH EMERALD GREEN ACCENTS (#087F5B) */}
+      {/* 5. DRIVER ETA TRACKER & ACTIVE ORDER LOGISTICS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 w-full">
         <div className="bg-gradient-to-r from-[#054934] via-[#087F5B] to-[#043324] text-white rounded-3xl p-6 sm:p-10 shadow-xl flex flex-col md:flex-row items-center gap-8">
           
@@ -392,22 +450,24 @@ export default function CustomerHomePage() {
             <div>
               <div className="inline-flex items-center gap-1.5 text-emerald-200 text-xs font-black uppercase tracking-wider mb-1">
                 <Bike className="w-4 h-4" />
-                <span>Driver ETA Tracker</span>
+                <span>{activeOrder ? "Live Order Delivery Tracking" : "Novo Courier Logistics Fleet"}</span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                How far is your driver?
+                {activeOrder ? `Tracking Order ${activeOrder.id}` : "How fast does Novo deliver?"}
               </h3>
               <p className="text-xs text-emerald-100 mt-1 font-medium">
-                Select a distance to see estimated arrival time in real time.
+                {activeOrder
+                  ? `From ${activeOrder.storeName} to ${activeOrder.deliveryAddress}`
+                  : "On-demand GPS dispatching brings food, groceries, and medicine to your doorstep in minutes."}
               </p>
             </div>
 
             {/* Distance Quick Buttons */}
             <div className="flex items-center gap-2">
               {[
-                { label: "Near (1.2 km)", progress: 75, eta: 4 },
-                { label: "Medium (2.8 km)", progress: 45, eta: 10 },
-                { label: "Far (4.5 km)", progress: 20, eta: 16 },
+                { label: "Near (1.2 km)", progress: 75 },
+                { label: "Medium (2.8 km)", progress: 45 },
+                { label: "Far (4.5 km)", progress: 20 },
               ].map((opt, idx) => (
                 <button
                   key={idx}
@@ -429,7 +489,9 @@ export default function CustomerHomePage() {
                 <div className="flex items-center gap-2 text-white font-extrabold text-xs sm:text-sm">
                   <span>🏍️ Status:</span>
                   <span className="text-emerald-200 font-black">
-                    {bikeProgress < 35
+                    {activeOrder
+                      ? `Status: ${activeOrder.status.replace("_", " ").toUpperCase()}`
+                      : bikeProgress < 35
                       ? "Driver picking up package"
                       : bikeProgress < 75
                       ? "Driver on the move"
@@ -450,9 +512,9 @@ export default function CustomerHomePage() {
               </div>
 
               <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-100">
-                <span>Store</span>
+                <span>{activeOrder ? activeOrder.storeName : "Store"}</span>
                 <span className="text-white font-black">{bikeProgress}% completed</span>
-                <span>Your Address</span>
+                <span>{activeOrder ? "Drop-off Address" : "Your Address"}</span>
               </div>
             </div>
           </div>
@@ -600,7 +662,7 @@ export default function CustomerHomePage() {
                   addToCart(selectedProduct);
                   setSelectedProduct(null);
                 }}
-                className="px-6 py-2.5 rounded-xl bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-colors"
+                className="px-6 py-2.5 rounded-xl bg-[#087F5B] hover:bg-[#065f44] text-white text-xs font-black transition-colors cursor-pointer"
               >
                 Add to Order
               </button>
@@ -611,3 +673,4 @@ export default function CustomerHomePage() {
     </div>
   );
 }
+

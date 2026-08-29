@@ -85,42 +85,51 @@ interface PlatformContextType {
 
 const PlatformContext = createContext<PlatformContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = "novo_platform_state_v1";
+const LOCAL_STORAGE_KEY = "novo_platform_state_v2";
 
 export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState<UserRole>("customer");
 
-  const [currentUser] = useState<User>({
-    id: "usr-100",
-    name: "Godswill Okenrenkporo",
-    email: "godswill@novo.ng",
-    phone: "+234 802 111 9900",
+  const [currentUser, setCurrentUser] = useState<User>({
+    id: "",
+    name: "Guest User",
+    email: "",
+    phone: "",
     role: "customer",
-    address: "Apartment 4B, Palm Grove Estate, Commercial Avenue",
+    address: "",
     createdAt: new Date().toISOString(),
   });
 
-  const [stores, setStores] = useState<Store[]>(INITIAL_STORES);
-  const [activeStoreId, setActiveStoreId] = useState<string>(INITIAL_STORES[0].id);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [stores, setStores] = useState<Store[]>([]);
+  const [activeStoreId, setActiveStoreId] = useState<string>("");
+  const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
-  const [riders, setRiders] = useState<RiderProfile[]>(INITIAL_RIDERS);
-  const [riderProfile, setRiderProfile] = useState<RiderProfile>(INITIAL_RIDERS[0]);
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: "rev-1",
-      orderId: "ORD-9824",
-      customerName: "Godswill Okenrenkporo",
-      storeId: "store-1",
-      rating: 5,
-      comment: "Hot and super delicious Jollof rice! Driver delivered in 18 minutes. 5 stars!",
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [riders, setRiders] = useState<RiderProfile[]>([]);
+  const [riderProfile, setRiderProfile] = useState<RiderProfile>({
+    id: "",
+    name: "",
+    email: "",
+    phone: "",
+    role: "rider",
+    avatar: "",
+    address: "",
+    createdAt: new Date().toISOString(),
+    isOnline: false,
+    isVerified: false,
+    verificationStatus: "pending",
+    vehicleType: "motorcycle",
+    vehiclePlate: "",
+    rating: 5.0,
+    totalDeliveries: 0,
+    earningsToday: 0,
+    earningsThisWeek: 0,
+    tipsToday: 0,
+  });
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  const [favorites, setFavorites] = useState<string[]>(["store-1", "prod-1"]);
+  const [favorites, setFavorites] = useState<string[]>([]);
 
   const toggleFavorite = (id: string) => {
     setFavorites((prev) =>
@@ -170,36 +179,77 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (typeof window !== "undefined") {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_email");
+      localStorage.removeItem("merchant_profile");
     }
     setIsAuthenticated(false);
+    setCurrentUser({
+      id: "",
+      name: "Guest User",
+      email: "",
+      phone: "",
+      role: "customer",
+      address: "",
+      createdAt: new Date().toISOString(),
+    });
   };
+
+  // Fetch logged in user profile
+  useEffect(() => {
+    async function loadUserProfile() {
+      if (isAuthenticated) {
+        try {
+          const profile = await apiService.getMe();
+          if (profile) {
+            setCurrentUser({
+              id: profile.id || profile.user_id || "usr-me",
+              name: profile.full_name || profile.name || profile.email?.split("@")[0] || "User",
+              email: profile.email || "",
+              phone: profile.phone || "",
+              role: profile.role || "customer",
+              address: profile.address || "",
+              createdAt: profile.created_at || new Date().toISOString(),
+            });
+          }
+        } catch (e) {
+          console.warn("Failed to load user profile in PlatformContext:", e);
+        }
+      }
+    }
+    loadUserProfile();
+  }, [isAuthenticated]);
 
   // Load from LocalStorage on client start
   useEffect(() => {
     try {
+      // Clear old v1 localStorage key containing dummy seed items
+      localStorage.removeItem("novo_platform_state_v1");
+
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.stores && Array.isArray(parsed.stores)) {
           const map = new Map<string, Store>();
           parsed.stores.forEach((s: Store) => {
-            if (s && s.id) map.set(s.id, s);
+            if (s && s.id && !s.id.startsWith("store-1") && !s.id.startsWith("store-2") && !s.id.startsWith("store-3") && !s.id.startsWith("store-4") && !s.id.startsWith("store-5")) {
+              map.set(s.id, s);
+            }
           });
-          setStores(Array.from(map.values()));
+          if (map.size > 0) setStores(Array.from(map.values()));
         }
         if (parsed.products && Array.isArray(parsed.products)) {
           const map = new Map<string, Product>();
           parsed.products.forEach((p: Product) => {
-            if (p && p.name) {
+            if (p && p.name && !p.id.startsWith("prod-")) {
               const nameKey = p.name.toLowerCase().trim();
               if (!map.has(nameKey)) map.set(nameKey, p);
             }
           });
-          setProducts(Array.from(map.values()));
+          if (map.size > 0) setProducts(Array.from(map.values()));
         }
-        if (parsed.orders) setOrders(parsed.orders);
+        if (parsed.orders && Array.isArray(parsed.orders)) {
+          setOrders(parsed.orders.filter((o: Order) => o.id !== "ORD-9824"));
+        }
         if (parsed.cart) setCart(parsed.cart);
-        if (parsed.riderProfile) setRiderProfile(parsed.riderProfile);
       }
     } catch (e) {
       console.warn("Failed to load state from localStorage", e);
@@ -266,12 +316,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, []);
 
-  // Fetch backend stores and products on mount so new stores appear live for customers
+  // Fetch backend stores and products on mount
   useEffect(() => {
     async function loadBackendStoresAndProducts() {
       try {
         const backendStores = await apiService.getStores();
-        if (Array.isArray(backendStores) && backendStores.length > 0) {
+        if (Array.isArray(backendStores)) {
           const formattedStores: Store[] = backendStores.map((bs: any) => ({
             id: bs.id,
             merchantId: bs.merchant_id,
@@ -294,18 +344,14 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             cuisineType: bs.store_type || "Restaurant",
           }));
 
-          setStores((prev) => {
-            const map = new Map<string, Store>();
-            formattedStores.forEach((s) => map.set(s.id, s));
-            prev.forEach((s) => {
-              if (!map.has(s.id)) map.set(s.id, s);
-            });
-            return Array.from(map.values());
-          });
+          setStores(formattedStores);
+          if (formattedStores.length > 0) {
+            setActiveStoreId((prev) => prev || formattedStores[0].id);
+          }
         }
 
         const backendProducts = await apiService.getProducts();
-        if (Array.isArray(backendProducts) && backendProducts.length > 0) {
+        if (Array.isArray(backendProducts)) {
           const formattedProducts: Product[] = backendProducts.map((bp: any) => ({
             id: bp.id,
             storeId: bp.store_id || bp.storeId,
@@ -316,18 +362,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             image: bp.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80",
             inStock: bp.in_stock !== false,
           }));
-          setProducts((prev) => {
-            const map = new Map<string, Product>();
-            formattedProducts.forEach((p) => {
-              const nameKey = p.name.toLowerCase().trim();
-              if (!map.has(nameKey)) map.set(nameKey, p);
-            });
-            prev.forEach((p) => {
-              const nameKey = p.name.toLowerCase().trim();
-              if (!map.has(nameKey)) map.set(nameKey, p);
-            });
-            return Array.from(map.values());
-          });
+          setProducts(formattedProducts);
+        }
+
+        const backendOrders = await apiService.getOrders();
+        if (Array.isArray(backendOrders) && backendOrders.length > 0) {
+          setOrders(backendOrders);
         }
       } catch (e) {
         console.error("Failed to load backend stores/products in PlatformContext:", e);
@@ -591,16 +631,16 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const commissionEarned = Math.round(totalRevenue * 0.15);
 
   const analytics: PlatformAnalytics = {
-    totalRevenue: totalRevenue || 1245000,
+    totalRevenue: totalRevenue,
     totalOrders: orders.length,
     activeStoresCount: stores.filter((s) => s.status === "active").length,
     activeRidersCount: riders.length,
-    totalCustomersCount: 3890 + orders.length,
-    gmvToday: totalRevenue || 185400,
-    commissionEarned: commissionEarned || 18540,
+    totalCustomersCount: orders.length,
+    gmvToday: totalRevenue,
+    commissionEarned: commissionEarned,
   };
 
-  const activeStore = stores.find((s) => s.id === activeStoreId) || stores[0];
+  const activeStore = stores.find((s) => s.id === activeStoreId) || stores[0] || ({} as Store);
 
   return (
     <PlatformContext.Provider
