@@ -1,6 +1,6 @@
 import { Store, Product, Order, RiderProfile, PlatformAnalytics, Review } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
 // Helper for authorized headers
 const getAuthHeaders = (token?: string) => {
@@ -412,6 +412,28 @@ export const apiService = {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Payment initialization failed");
     return data;
+  },
+
+  recordPaymentTransaction: async (
+    paymentId: string,
+    payload: { provider_tx_id?: string; amount: number; currency?: string; status: string; raw_response?: any },
+    token?: string
+  ) => {
+    const res = await fetch(`${API_BASE_URL}/payments/${paymentId}/transactions`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Recording transaction failed");
+    return data;
+  },
+
+  verifyPayment: async (reference: string) => {
+    const res = await fetch(`${API_BASE_URL}/payments/verify/${reference}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Payment verification failed");
+    return data.data || data;
   },
 
   // 10. WALLETS MODULE (/api/v1/wallets)

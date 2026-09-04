@@ -43,9 +43,9 @@ export function SupportChatWidget() {
       if (userQuery.includes("order") || userQuery.includes("track")) {
         botResponse = "To track your order, go to the 'Orders' tab in your navbar to see real-time driver ETA!";
       } else if (userQuery.includes("refund") || userQuery.includes("cancel")) {
-        botResponse = "For cancellations or refund requests, please provide your Order ID (e.g. ORD-9824).";
+        botResponse = "For cancellations or refund requests, please provide your Order ID from your Orders page.";
       } else if (userQuery.includes("promo") || userQuery.includes("discount")) {
-        botResponse = "Use promo code 'NOVO500' at checkout to enjoy ₦500 OFF your delivery!";
+        botResponse = "Enter any valid promotional code at checkout to enjoy discounts on your delivery!";
       }
 
       setMessages((prev) => [

@@ -3,19 +3,41 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { User, MapPin, CreditCard, Heart, LogOut, ShieldCheck, Phone, Mail, CheckCircle2, Store } from "lucide-react";
+import { User, MapPin, CreditCard, Heart, LogOut, ShieldCheck, Phone, Mail, CheckCircle2, LogIn } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
 export default function CustomerProfilePage() {
   const router = useRouter();
-  const { currentUser, logout, favorites, stores, products } = usePlatform();
-  const [name, setName] = useState(currentUser.name);
-  const [phone, setPhone] = useState(currentUser.phone);
+  const { currentUser, isAuthenticated, logout, favorites, stores, products } = usePlatform();
+  const [name, setName] = useState(currentUser.name || "");
+  const [phone, setPhone] = useState(currentUser.phone || "");
   const [address, setAddress] = useState(currentUser.address || "");
   const [saved, setSaved] = useState(false);
   const [loggedOut, setLoggedOut] = useState(false);
+
+  // Unauthenticated State Handling
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-20 text-center flex flex-col items-center justify-center min-h-[65vh]">
+        <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 shadow-sm">
+          <User className="w-10 h-10" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+          Sign In to Your Profile
+        </h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-8 leading-relaxed max-w-sm">
+          Log in or create a Novo account to manage your delivery address, track active orders, and view your saved stores.
+        </p>
+        <Link href="/auth" className="w-full">
+          <Button variant="primary" size="lg" className="w-full" rightIcon={<LogIn className="w-4 h-4" />}>
+            Sign In / Register
+          </Button>
+        </Link>
+      </div>
+    );
+  }
 
   const favStores = stores.filter((s) => favorites.includes(s.id));
   const favProducts = products.filter((p) => favorites.includes(p.id));
@@ -34,6 +56,8 @@ export default function CustomerProfilePage() {
     }, 800);
   };
 
+  const displayName = name || currentUser.email.split("@")[0] || "User";
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
       {loggedOut && (
@@ -47,10 +71,10 @@ export default function CustomerProfilePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-            {name ? name.charAt(0).toUpperCase() : "U"}
+            {displayName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">{name}</h1>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-slate-100">{displayName}</h1>
             <p className="text-xs font-semibold text-slate-500">{currentUser.email}</p>
           </div>
         </div>
@@ -146,7 +170,7 @@ export default function CustomerProfilePage() {
             
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs font-bold bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900">
               <ShieldCheck className="w-4 h-4 shrink-0" />
-              <span>Verified Supabase Account</span>
+              <span>Verified Account</span>
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800">

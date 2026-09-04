@@ -47,8 +47,6 @@ function OrderTrackerContent() {
     }
   };
 
-  const currentStep = currentOrder ? getStepIndex(currentOrder.status) : 1;
-
   const handleSubmitRating = (e: React.FormEvent) => {
     e.preventDefault();
     if (currentOrder) {
@@ -56,6 +54,25 @@ function OrderTrackerContent() {
       setRatingModalOpen(false);
     }
   };
+
+  const currentStep = currentOrder ? getStepIndex(currentOrder.status) : 1;
+
+  if (orders.length === 0) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-20 text-center flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-4">
+          <Clock className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">No Active or Past Orders</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 mb-6 max-w-sm">
+          Your order tracking and order history will appear here once you place your first order.
+        </p>
+        <Button variant="primary" onClick={() => window.location.href = "/shop"}>
+          Explore Stores
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
@@ -188,26 +205,7 @@ function OrderTrackerContent() {
                 </div>
               )}
 
-              {/* DEMO FAST FORWARD STATUS */}
-              <div className="p-4 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-900/60 flex items-center justify-between text-xs">
-                <span className="font-bold text-amber-800 dark:text-amber-300">
-                  Demo Fast-Forward Status:
-                </span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => updateOrderStatus(currentOrder.id, "rider_assigned")}
-                    className="px-3 py-1 rounded-lg bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 font-bold"
-                  >
-                    Rider Assigned
-                  </button>
-                  <button
-                    onClick={() => updateOrderStatus(currentOrder.id, "delivered")}
-                    className="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold"
-                  >
-                    Mark Delivered
-                  </button>
-                </div>
-              </div>
+
 
               {currentOrder.status === "delivered" && (
                 <Button

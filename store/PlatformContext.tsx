@@ -63,7 +63,8 @@ interface PlatformContextType {
   placeOrder: (
     deliveryAddress: string,
     paymentMethod: "card" | "cash" | "transfer",
-    tipAmount: number
+    tipAmount: number,
+    existingBackendOrder?: any
   ) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   rateOrder: (orderId: string, storeRating: number, riderRating: number, comment: string) => void;
@@ -92,7 +93,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [currentUser, setCurrentUser] = useState<User>({
     id: "",
-    name: "Guest User",
+    name: "",
     email: "",
     phone: "",
     role: "customer",
@@ -184,7 +185,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsAuthenticated(false);
     setCurrentUser({
       id: "",
-      name: "Guest User",
+      name: "",
       email: "",
       phone: "",
       role: "customer",
@@ -218,41 +219,17 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadUserProfile();
   }, [isAuthenticated]);
 
-  // Load from LocalStorage on client start
+  // Load cart state from LocalStorage on client start
   useEffect(() => {
     try {
-      // Clear old v1 localStorage key containing dummy seed items
       localStorage.removeItem("novo_platform_state_v1");
-
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.stores && Array.isArray(parsed.stores)) {
-          const map = new Map<string, Store>();
-          parsed.stores.forEach((s: Store) => {
-            if (s && s.id && !s.id.startsWith("store-1") && !s.id.startsWith("store-2") && !s.id.startsWith("store-3") && !s.id.startsWith("store-4") && !s.id.startsWith("store-5")) {
-              map.set(s.id, s);
-            }
-          });
-          if (map.size > 0) setStores(Array.from(map.values()));
-        }
-        if (parsed.products && Array.isArray(parsed.products)) {
-          const map = new Map<string, Product>();
-          parsed.products.forEach((p: Product) => {
-            if (p && p.name && !p.id.startsWith("prod-")) {
-              const nameKey = p.name.toLowerCase().trim();
-              if (!map.has(nameKey)) map.set(nameKey, p);
-            }
-          });
-          if (map.size > 0) setProducts(Array.from(map.values()));
-        }
-        if (parsed.orders && Array.isArray(parsed.orders)) {
-          setOrders(parsed.orders.filter((o: Order) => o.id !== "ORD-9824"));
-        }
-        if (parsed.cart) setCart(parsed.cart);
+        if (parsed.cart && Array.isArray(parsed.cart)) setCart(parsed.cart);
       }
     } catch (e) {
-      console.warn("Failed to load state from localStorage", e);
+      console.warn("Failed to load cart state from localStorage", e);
     }
   }, []);
 
@@ -365,9 +342,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setProducts(formattedProducts);
         }
 
-        const backendOrders = await apiService.getOrders();
-        if (Array.isArray(backendOrders) && backendOrders.length > 0) {
-          setOrders(backendOrders);
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (token) {
+          const backendOrders = await apiService.getOrders(undefined, token);
+          if (Array.isArray(backendOrders) && backendOrders.length > 0) {
+            setOrders(backendOrders);
+          }
         }
       } catch (e) {
         console.error("Failed to load backend stores/products in PlatformContext:", e);
@@ -498,33 +478,59 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const placeOrder = (
     deliveryAddress: string,
     paymentMethod: "card" | "cash" | "transfer",
-    tipAmount = 0
+    tipAmount = 0,
+    existingBackendOrder?: any
   ): Order => {
     const targetStoreId = cart[0]?.product?.storeId || (cart[0]?.product as any)?.store_id;
     const store = stores.find((s) => s.id === targetStoreId) || stores[0];
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      customerId: currentUser.id,
-      customerName: currentUser.name,
-      customerPhone: currentUser.phone,
-      deliveryAddress: deliveryAddress || currentUser.address || "14 Commercial Avenue, Central District",
-      storeId: targetStoreId || store.id,
-      storeName: store.name,
-      storeAddress: store.address,
-      items: [...cart],
-      subtotal: cartSubtotal,
-      deliveryFee: cartDeliveryFee,
-      serviceFee: cartServiceFee,
-      tip: tipAmount,
-      total: cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount,
-      status: "pending_merchant",
-      paymentMethod,
-      paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
-      pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
-      estimatedDeliveryMinutes: 25,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+
+    const newOrder: Order = existingBackendOrder
+      ? {
+          id: existingBackendOrder.id,
+          customerId: existingBackendOrder.customer_id || currentUser.id,
+          customerName: existingBackendOrder.customer_name || currentUser.name || "Customer",
+          customerPhone: currentUser.phone || "",
+          deliveryAddress: existingBackendOrder.delivery_address || deliveryAddress,
+          storeId: targetStoreId || store.id,
+          storeName: store?.name || "Merchant Store",
+          storeAddress: store?.address || "",
+          items: [...cart],
+          subtotal: existingBackendOrder.subtotal || cartSubtotal,
+          deliveryFee: existingBackendOrder.delivery_fee || cartDeliveryFee,
+          serviceFee: existingBackendOrder.service_fee || cartServiceFee,
+          tip: existingBackendOrder.tip || tipAmount,
+          total: existingBackendOrder.total || (cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount),
+          status: "pending_merchant",
+          paymentMethod,
+          paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
+          pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
+          estimatedDeliveryMinutes: 25,
+          createdAt: existingBackendOrder.created_at || new Date().toISOString(),
+          updatedAt: existingBackendOrder.updated_at || new Date().toISOString(),
+        }
+      : {
+          id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+          customerId: currentUser.id,
+          customerName: currentUser.name,
+          customerPhone: currentUser.phone,
+          deliveryAddress: deliveryAddress || currentUser.address || "14 Commercial Avenue, Central District",
+          storeId: targetStoreId || store?.id,
+          storeName: store?.name || "Merchant Store",
+          storeAddress: store?.address,
+          items: [...cart],
+          subtotal: cartSubtotal,
+          deliveryFee: cartDeliveryFee,
+          serviceFee: cartServiceFee,
+          tip: tipAmount,
+          total: cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount,
+          status: "pending_merchant",
+          paymentMethod,
+          paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
+          pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
+          estimatedDeliveryMinutes: 25,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
 
     setOrders((prev) => [newOrder, ...prev]);
     clearCart();

@@ -117,7 +117,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
         (o.status as string) === "pending" ||
         (o.status as string) === "pending_merchant" ||
         o.status === "preparing"
-    ).length || 12;
+    ).length;
 
   const navItems = [
     { label: "Dashboard", href: "/merchant", icon: LayoutGrid },
@@ -232,7 +232,7 @@ export default function MerchantLayout({ children }: { children: React.ReactNode
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-[#66736E] dark:text-slate-400 hidden sm:inline">Welcome back,</span>
                 <h1 className="text-base sm:text-xl font-black text-slate-900 dark:text-white truncate flex items-center gap-1.5">
-                  <span>{merchantProfile?.businessName || (activeStore && activeStore.id !== "store-1" ? activeStore.name : "Your Business Store")}</span>
+                  <span>{merchantProfile?.businessName || activeStore?.name || "Your Business Store"}</span>
                   <CheckCircle2 className="w-4 h-4 text-[#087F5B] fill-[#087F5B] text-white shrink-0" />
                 </h1>
               </div>
