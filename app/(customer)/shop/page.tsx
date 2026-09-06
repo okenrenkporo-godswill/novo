@@ -88,8 +88,26 @@ function ShopContent() {
           </div>
         </div>
 
+        {/* Special Offer Banner (Screen 6) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#087F5B] text-white flex items-center justify-between shadow-md">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-white/20">
+                <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
+              </div>
+              <div>
+                <h4 className="text-xs font-black">Special Offer</h4>
+                <p className="text-[11px] text-emerald-100">Up to 20% off on selected menu items</p>
+              </div>
+            </div>
+            <button className="px-3.5 py-1.5 rounded-xl bg-white text-[#087F5B] text-xs font-black hover:bg-emerald-50 transition-transform active:scale-95 shadow-sm">
+              View
+            </button>
+          </div>
+        </div>
+
         {/* Menu Navigation & Search */}
-        <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md">
+        <div className="sticky top-0 sm:top-16 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md mt-4">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none">
@@ -99,7 +117,7 @@ function ShopContent() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
                     activeCategory === cat
-                      ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                      ? "bg-[#087F5B] text-white shadow-sm"
                       : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -123,7 +141,7 @@ function ShopContent() {
         </div>
 
         {/* Product Catalog Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full">
           {filteredProducts.length === 0 ? (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 font-medium">
               {storeProducts.length === 0
@@ -144,7 +162,7 @@ function ShopContent() {
           )}
         </div>
 
-        {/* PRODUCT DETAILS MODAL */}
+        {/* PRODUCT DETAILS MODAL (Exact Screen 7: Product Details Sheet) */}
         <Modal
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
@@ -152,44 +170,63 @@ function ShopContent() {
         >
           {selectedProduct && (
             <div className="flex flex-col gap-4">
-              <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
                   src={selectedProduct.image}
                   alt={selectedProduct.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {selectedProduct.description}
-              </p>
-              {selectedProduct.options && selectedProduct.options.length > 0 && (
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                    Select Add-ons
-                  </span>
-                  {selectedProduct.options.map((opt: any) => (
-                    <label
-                      key={opt.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200"
-                    >
-                      <span>{opt.name}</span>
-                      <span className="text-emerald-600 font-bold">+₦{opt.price}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
-                <span className="text-lg font-black text-slate-900 dark:text-slate-100">
+
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{selectedProduct.name}</h3>
+                <span className="text-base font-black text-[#087F5B] dark:text-emerald-400">
                   ₦{selectedProduct.price.toLocaleString()}
                 </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                <span>4.6 (1.2k reviews)</span>
+              </div>
+
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {selectedProduct.description || "Juicy beef patty, fresh lettuce, tomato, cheese and our special signature sauce."}
+              </p>
+
+              {/* Add-ons Checklist (Screen 7 Add-ons) */}
+              <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+                  Add-ons
+                </span>
+                {[
+                  { name: "Extra Cheese", price: 500 },
+                  { name: "Bacon", price: 800 },
+                  { name: "Extra Patty", price: 1000 },
+                ].map((addon) => (
+                  <label
+                    key={addon.name}
+                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200 hover:border-emerald-500"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <input type="checkbox" className="rounded border-slate-300 text-[#087F5B] focus:ring-[#087F5B]" />
+                      <span>{addon.name}</span>
+                    </div>
+                    <span className="text-[#087F5B] font-bold">+₦{addon.price.toLocaleString()}</span>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                 <Button
                   variant="primary"
+                  className="w-full bg-[#087F5B] hover:bg-[#065f44] text-white py-3 rounded-2xl font-black text-sm"
                   onClick={() => {
                     addToCart(selectedProduct);
                     setSelectedProduct(null);
                   }}
                 >
-                  Add to Cart
+                  Add to Cart • ₦{selectedProduct.price.toLocaleString()}
                 </Button>
               </div>
             </div>

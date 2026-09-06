@@ -318,7 +318,7 @@ export default function CheckoutPage() {
                 size="lg"
                 isLoading={isSubmitting}
                 onClick={handlePlaceOrder}
-                className="mt-2 w-full"
+                className="mt-2 w-full bg-[#087F5B] hover:bg-[#065f44] text-white py-3.5 rounded-2xl font-black text-sm"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 {paymentMethod === "card" ? "Pay with Paystack" : "Place Order"} • ₦{total.toLocaleString()}
