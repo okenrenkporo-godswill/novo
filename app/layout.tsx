@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { Sora } from "next/font/google";
 import "./globals.css";
 import { PlatformProvider } from "@/store/PlatformContext";
 import ResponsiveLayout from "@/components/shared/ResponsiveLayout";
+
+const sora = Sora({
+  subsets: ["latin"],
+  variable: "--font-sora",
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700", "800"],
+});
 
 export const metadata: Metadata = {
   title: "Novo | On-Demand Delivery Express",
@@ -19,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased bg-slate-50 dark:bg-slate-950">
+    <html lang="en" className={sora.variable}>
+      <body className={`${sora.className} antialiased bg-slate-50 dark:bg-slate-950`}>
         <PlatformProvider>
           <ResponsiveLayout>{children}</ResponsiveLayout>
         </PlatformProvider>

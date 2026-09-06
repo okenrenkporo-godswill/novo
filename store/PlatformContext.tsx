@@ -171,7 +171,15 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const loginUser = (token: string, email?: string) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("access_token", token);
-      if (email) localStorage.setItem("user_email", email);
+      document.cookie = `access_token=${token}; path=/; max-age=2592000`;
+      if (email) {
+        localStorage.setItem("user_email", email);
+        if (email.toLowerCase().includes("admin") || email === "admin@novo.ng") {
+          localStorage.setItem("novo_role", "admin");
+          document.cookie = `novo_role=admin; path=/; max-age=2592000`;
+          setCurrentRole("admin");
+        }
+      }
     }
     setIsAuthenticated(true);
   };
@@ -181,6 +189,9 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_email");
       localStorage.removeItem("merchant_profile");
+      localStorage.removeItem("novo_role");
+      document.cookie = `access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `novo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     }
     setIsAuthenticated(false);
     setCurrentUser({
@@ -201,15 +212,23 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
           const profile = await apiService.getMe();
           if (profile) {
+            const userRole = profile.role || (profile.email?.includes("admin") ? "admin" : "customer");
             setCurrentUser({
               id: profile.id || profile.user_id || "usr-me",
               name: profile.full_name || profile.name || profile.email?.split("@")[0] || "User",
               email: profile.email || "",
               phone: profile.phone || "",
-              role: profile.role || "customer",
+              role: userRole as UserRole,
               address: profile.address || "",
               createdAt: profile.created_at || new Date().toISOString(),
             });
+            if (userRole === "admin" || userRole === "super_admin") {
+              setCurrentRole("admin");
+              if (typeof window !== "undefined") {
+                localStorage.setItem("novo_role", "admin");
+                document.cookie = `novo_role=admin; path=/; max-age=2592000`;
+              }
+            }
           }
         } catch (e) {
           console.warn("Failed to load user profile in PlatformContext:", e);

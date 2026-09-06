@@ -103,7 +103,7 @@ export default function MerchantEarningsPage() {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-5 py-2.5 rounded-2xl bg-[#087F5B] text-white text-xs font-black hover:bg-[#065A43] transition-all flex items-center gap-2 cursor-pointer shadow-md shadow-[#087F5B]/20"
+          className="px-5 py-2.5 rounded-2xl bg-[#087F5B] text-white text-xs font-black flex items-center gap-2 cursor-pointer"
         >
           <Building2 className="w-4 h-4" />
           <span>Withdraw to Bank Account</span>
@@ -117,9 +117,9 @@ export default function MerchantEarningsPage() {
         </div>
       )}
 
-      {/* WALLET BALANCE CARDS */}
+      {/* WALLET BALANCE CARDS - FLAT & BORDERLESS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-[#087F5B] text-white p-6 rounded-3xl shadow-lg flex flex-col justify-between">
+        <div className="bg-[#087F5B] text-white p-6 rounded-3xl flex flex-col justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-100">Available Payout Balance</span>
           <div className="my-4">
             <span className="text-3xl font-black">₦{balance.toLocaleString()}</span>
@@ -127,7 +127,7 @@ export default function MerchantEarningsPage() {
           <span className="text-[10px] font-semibold text-emerald-200">Linked Wallet: NGN Ledger Active</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl flex flex-col justify-between">
           <span className="text-xs font-bold text-[#66736E] dark:text-slate-400">Pending Clearance</span>
           <div className="my-4">
             <span className="text-2xl font-black text-slate-900 dark:text-white">₦{pendingClearance.toLocaleString()}</span>
@@ -135,17 +135,25 @@ export default function MerchantEarningsPage() {
           <span className="text-[10px] text-slate-400 font-medium">Settles in 24 hours</span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-          <span className="text-xs font-bold text-[#66736E] dark:text-slate-400">Total Lifetime Revenue</span>
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-[#66736E] dark:text-slate-400">Total Lifetime Revenue</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+              Paystack Subaccount
+            </span>
+          </div>
           <div className="my-4">
             <span className="text-2xl font-black text-slate-900 dark:text-white">₦{lifetimeRevenue.toLocaleString()}</span>
           </div>
-          <span className="text-[10px] text-emerald-600 font-bold">{completedOrdersCount} Completed Orders</span>
+          <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium">
+            <span>{completedOrdersCount} Completed Orders</span>
+            <span className="text-emerald-600 font-bold">10% Platform Commission</span>
+          </div>
         </div>
       </div>
 
-      {/* TRANSACTIONS TABLE */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+      {/* TRANSACTIONS TABLE - FLAT & BORDERLESS */}
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl flex flex-col gap-4">
         <h3 className="text-base font-black text-slate-900 dark:text-white">Transaction History</h3>
 
         {txns.length === 0 ? (
@@ -165,7 +173,7 @@ export default function MerchantEarningsPage() {
               return (
                 <div
                   key={t.id || idx}
-                  className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800"
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40"
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -197,10 +205,10 @@ export default function MerchantEarningsPage() {
         )}
       </div>
 
-      {/* WITHDRAWAL MODAL */}
+      {/* WITHDRAWAL MODAL - FLAT & BORDERLESS */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full flex flex-col gap-4">
             <h3 className="text-base font-black text-slate-900 dark:text-white">Request Payout Withdrawal</h3>
             <p className="text-xs text-[#66736E]">Withdraw funds directly from your NGN wallet balance to your bank account:</p>
 
@@ -214,7 +222,7 @@ export default function MerchantEarningsPage() {
                   onChange={(e) => setWithdrawAmt(e.target.value)}
                   placeholder="Enter amount (e.g. 10000)"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold outline-none text-slate-900 dark:text-white"
+                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-xs font-bold outline-none text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -229,7 +237,7 @@ export default function MerchantEarningsPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2.5 rounded-2xl bg-[#087F5B] text-white text-xs font-black hover:bg-[#065A43] transition-all cursor-pointer shadow-md"
+                  className="px-5 py-2.5 rounded-2xl bg-[#087F5B] text-white text-xs font-black cursor-pointer"
                 >
                   {loading ? "Processing..." : "Submit Payout Request"}
                 </button>

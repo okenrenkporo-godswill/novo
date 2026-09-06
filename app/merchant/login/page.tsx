@@ -57,22 +57,22 @@ export default function MerchantLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAF9] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans text-[#17201D]">
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800 flex flex-col gap-6">
+    <div className="h-screen w-full bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center px-4 overflow-hidden select-none font-sans text-slate-900 dark:text-slate-100">
+      <div className="w-full max-w-sm sm:max-w-md flex flex-col gap-4 py-2">
         {/* LOGO */}
-        <div className="flex flex-col items-center text-center gap-3">
-          <NovoLogo subtitle="Merchant Portal" size="lg" href="/merchant" />
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">Merchant Portal Sign In</h2>
-          <p className="text-xs text-[#66736E] dark:text-slate-400">Sign in to manage your store, orders & earnings</p>
+        <div className="flex flex-col items-center text-center gap-2">
+          <NovoLogo subtitle="Merchant Portal" size="md" href="/merchant" />
+          <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">Merchant Portal Sign In</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Sign in to manage your store, orders &amp; earnings</p>
         </div>
 
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold text-center leading-relaxed">
+          <div className="p-3 bg-rose-50 text-rose-700 text-xs font-bold text-center leading-relaxed">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="flex flex-col gap-3">
           <div>
             <label className="text-xs font-black text-slate-700 dark:text-slate-300">Merchant Email</label>
             <div className="relative mt-1">
@@ -83,7 +83,7 @@ export default function MerchantLoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="store@restaurant.com"
                 required
-                className="w-full pl-9 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold outline-none text-slate-900 dark:text-white"
+                className="w-full pl-9 p-3 bg-slate-100 dark:bg-slate-800 text-xs font-bold outline-none text-slate-900 dark:text-white rounded-none"
               />
             </div>
           </div>
@@ -98,7 +98,7 @@ export default function MerchantLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full pl-9 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold outline-none text-slate-900 dark:text-white"
+                className="w-full pl-9 p-3 bg-slate-100 dark:bg-slate-800 text-xs font-bold outline-none text-slate-900 dark:text-white rounded-none"
               />
             </div>
           </div>
@@ -106,15 +106,15 @@ export default function MerchantLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 py-3 rounded-2xl bg-[#087F5B] text-white text-xs font-black hover:bg-[#065A43] transition-all cursor-pointer shadow-md shadow-[#087F5B]/20 flex items-center justify-center gap-2"
+            className="w-full mt-1 py-3 bg-[#087F5B] text-white text-xs font-black cursor-pointer flex items-center justify-center gap-2 rounded-none"
           >
             <span>{loading ? "Authenticating..." : "Sign In to Merchant Portal"}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="text-center pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-          <span className="text-[#66736E] dark:text-slate-400">New Store Partner?</span>
+        <div className="text-center pt-2 flex items-center justify-between text-xs">
+          <span className="text-slate-500 dark:text-slate-400">New Store Partner?</span>
           <Link
             href="/merchant/register"
             className="text-[#087F5B] dark:text-emerald-400 font-black hover:underline"
