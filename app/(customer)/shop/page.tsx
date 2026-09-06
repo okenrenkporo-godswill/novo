@@ -19,14 +19,26 @@ function ShopContent() {
       (s) =>
         s.id === storeParam ||
         s.slug === storeParam ||
-        s.name.toLowerCase() === storeParam.toLowerCase()
+        (s.name && s.name.toLowerCase() === storeParam.toLowerCase())
     ) || stores[0];
-
-  const storeProducts = products.filter((p) => p.storeId === store.id);
 
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  if (!store) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Store Not Found</h2>
+        <p className="text-slate-500 text-sm">We couldn&apos;t find the store you are looking for.</p>
+        <a href="/" className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-colors">
+          Return Home
+        </a>
+      </div>
+    );
+  }
+
+  const storeProducts = products.filter((p) => p.storeId === store.id);
 
   const categories = ["All", ...Array.from(new Set(storeProducts.map((p) => p.category)))];
 
@@ -42,7 +54,7 @@ function ShopContent() {
     <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
       {/* Store Cover Header */}
       <div className="relative w-full h-56 sm:h-72 bg-slate-800 overflow-hidden">
-        <img src={store.banner} alt={store.name} className="w-full h-full object-cover" />
+        <img src={store.banner || ""} alt={store.name || "Store banner"} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
 
         <div className="absolute bottom-6 left-4 sm:left-8 right-4 sm:right-8 flex items-end gap-4">

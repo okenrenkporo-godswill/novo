@@ -7,7 +7,6 @@ import {
   Search,
   ShoppingBag,
   ArrowRight,
-  Bike,
   Zap,
   ShieldCheck,
   Clock,
@@ -42,8 +41,6 @@ export default function CustomerHomePage() {
   // Synchronized Slide & Text State
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // Rider Bike Delivery Simulator / Active Order Tracker State
-  const [bikeProgress, setBikeProgress] = useState(45);
 
   const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -84,13 +81,6 @@ export default function CustomerHomePage() {
     return () => clearInterval(slideInterval);
   }, [heroSlides.length]);
 
-  // Animate Express Rider Bike progress across track
-  useEffect(() => {
-    const bikeInterval = setInterval(() => {
-      setBikeProgress((prev) => (prev >= 100 ? 15 : prev + 1));
-    }, 300);
-    return () => clearInterval(bikeInterval);
-  }, []);
 
   const handleUseMyLocation = () => {
     setIsLocating(true);
@@ -431,96 +421,6 @@ export default function CustomerHomePage() {
         </div>
       </section>
 
-      {/* 5. DRIVER ETA TRACKER & ACTIVE ORDER LOGISTICS */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 w-full">
-        <div className="bg-gradient-to-r from-[#054934] via-[#087F5B] to-[#043324] text-white rounded-3xl p-6 sm:p-10 shadow-xl flex flex-col md:flex-row items-center gap-8">
-          
-          {/* Left Side: Rider Fleet Image */}
-          <div className="w-full md:w-1/2 h-64 sm:h-72 rounded-2xl overflow-hidden relative shrink-0">
-            <img
-              src="/images/rider-bike.png"
-              alt="Novo Courier Fleet"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#043324]/80 via-transparent to-transparent pointer-events-none" />
-          </div>
-
-          {/* Right Side: Live Driver ETA System */}
-          <div className="w-full md:w-1/2 flex flex-col gap-5">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-emerald-200 text-xs font-black uppercase tracking-wider mb-1">
-                <Bike className="w-4 h-4" />
-                <span>{activeOrder ? "Live Order Delivery Tracking" : "Novo Courier Logistics Fleet"}</span>
-              </div>
-              <h3 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {activeOrder ? `Tracking Order ${activeOrder.id}` : "How fast does Novo deliver?"}
-              </h3>
-              <p className="text-xs text-emerald-100 mt-1 font-medium">
-                {activeOrder
-                  ? `From ${activeOrder.storeName} to ${activeOrder.deliveryAddress}`
-                  : "On-demand GPS dispatching brings food, groceries, and medicine to your doorstep in minutes."}
-              </p>
-            </div>
-
-            {/* Distance Quick Buttons */}
-            <div className="flex items-center gap-2">
-              {[
-                { label: "Near (1.2 km)", progress: 75 },
-                { label: "Medium (2.8 km)", progress: 45 },
-                { label: "Far (4.5 km)", progress: 20 },
-              ].map((opt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setBikeProgress(opt.progress)}
-                  className={`px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                    Math.abs(bikeProgress - opt.progress) < 15
-                      ? "bg-white text-[#087F5B] font-black shadow-md"
-                      : "bg-white/15 text-white hover:bg-white/25 border border-white/20"
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Live Driver Status Box */}
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-white font-extrabold text-xs sm:text-sm">
-                  <span>🏍️ Status:</span>
-                  <span className="text-emerald-200 font-black">
-                    {activeOrder
-                      ? `Status: ${activeOrder.status.replace("_", " ").toUpperCase()}`
-                      : bikeProgress < 35
-                      ? "Driver picking up package"
-                      : bikeProgress < 75
-                      ? "Driver on the move"
-                      : "Driver arriving soon!"}
-                  </span>
-                </div>
-                <span className="text-xs font-black text-[#087F5B] bg-white px-3 py-1 rounded-full shadow-sm">
-                  {Math.max(2, Math.round((100 - bikeProgress) / 6))} mins away
-                </span>
-              </div>
-
-              {/* Progress Track */}
-              <div className="relative w-full bg-black/20 rounded-full h-3 overflow-hidden border border-white/20">
-                <div
-                  className="bg-white h-full rounded-full transition-all duration-300 shadow-sm"
-                  style={{ width: `${bikeProgress}%` }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] font-semibold text-emerald-100">
-                <span>{activeOrder ? activeOrder.storeName : "Store"}</span>
-                <span className="text-white font-black">{bikeProgress}% completed</span>
-                <span>{activeOrder ? "Drop-off Address" : "Your Address"}</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
 
       {/* 6. PARTNER & CAREER OPPORTUNITIES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 sm:mt-28 w-full">

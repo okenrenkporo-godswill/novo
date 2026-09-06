@@ -218,100 +218,14 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadUserProfile();
   }, [isAuthenticated]);
 
-  // Load from LocalStorage on client start
-  useEffect(() => {
-    try {
-      // Clear old v1 localStorage key containing dummy seed items
-      localStorage.removeItem("novo_platform_state_v1");
-
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.stores && Array.isArray(parsed.stores)) {
-          const map = new Map<string, Store>();
-          parsed.stores.forEach((s: Store) => {
-            if (s && s.id && !s.id.startsWith("store-1") && !s.id.startsWith("store-2") && !s.id.startsWith("store-3") && !s.id.startsWith("store-4") && !s.id.startsWith("store-5")) {
-              map.set(s.id, s);
-            }
-          });
-          if (map.size > 0) setStores(Array.from(map.values()));
-        }
-        if (parsed.products && Array.isArray(parsed.products)) {
-          const map = new Map<string, Product>();
-          parsed.products.forEach((p: Product) => {
-            if (p && p.name && !p.id.startsWith("prod-")) {
-              const nameKey = p.name.toLowerCase().trim();
-              if (!map.has(nameKey)) map.set(nameKey, p);
-            }
-          });
-          if (map.size > 0) setProducts(Array.from(map.values()));
-        }
-        if (parsed.orders && Array.isArray(parsed.orders)) {
-          setOrders(parsed.orders.filter((o: Order) => o.id !== "ORD-9824"));
-        }
-        if (parsed.cart) setCart(parsed.cart);
-      }
-    } catch (e) {
-      console.warn("Failed to load state from localStorage", e);
-    }
-  }, []);
-
-  // Synchronize authenticated merchant profile store into stores state & set activeStoreId
+  // Clear any cached client state on start to ensure 100% backend synchronization
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const rawProfile = localStorage.getItem("merchant_profile");
-      if (rawProfile) {
-        try {
-          const profile = JSON.parse(rawProfile);
-          if (profile.businessName) {
-            const storeSlug = profile.businessName.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-            const targetId = profile.id || `store-${storeSlug}`;
-
-            setStores((prev) => {
-              const map = new Map<string, Store>();
-              prev.forEach((s) => map.set(s.id, s));
-
-              const existing = prev.find(
-                (s) =>
-                  s.id === targetId ||
-                  s.name.toLowerCase() === profile.businessName.toLowerCase() ||
-                  s.slug === storeSlug
-              );
-
-              if (existing) {
-                return Array.from(map.values());
-              }
-
-              const newMerchantStore: Store = {
-                id: targetId,
-                name: profile.businessName,
-                slug: storeSlug,
-                description: `${profile.businessName} - Quality food, drinks & fast delivery`,
-                logo: getUniqueStoreLogo({ name: profile.businessName, category: profile.businessType }),
-                banner: getUniqueStoreBanner({ name: profile.businessName, category: profile.businessType }),
-                category: (profile.businessType || "restaurant").toLowerCase() as any,
-                address: profile.address || "Central District",
-                phone: profile.phone || "+234 800 000 0000",
-                rating: 5.0,
-                reviewCount: 0,
-                deliveryFee: 450,
-                deliveryTime: "20-30 min",
-                minOrder: 1000,
-                isOpening: true,
-                isVerified: true,
-                status: "active",
-                cuisineType: profile.businessType || "Restaurant",
-              };
-
-              map.set(newMerchantStore.id, newMerchantStore);
-              return Array.from(map.values());
-            });
-
-            setActiveStoreId(targetId);
-          }
-        } catch (e) {
-          console.warn("Failed to sync merchant store profile:", e);
-        }
+      try {
+        localStorage.removeItem("novo_platform_state_v1");
+        localStorage.removeItem("novo_platform_state_v2");
+      } catch (e) {
+        console.warn("Error purging stale storage keys:", e);
       }
     }
   }, []);
@@ -377,17 +291,6 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadBackendStoresAndProducts();
   }, []);
 
-  // Save to LocalStorage on state change
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({ stores, products, orders, cart, riderProfile })
-      );
-    } catch (e) {
-      console.warn("Failed to save state to localStorage", e);
-    }
-  }, [stores, products, orders, cart, riderProfile]);
 
   // Store management
   const addStore = (storeData: Omit<Store, "id" | "rating" | "reviewCount" | "isVerified">): Store => {
