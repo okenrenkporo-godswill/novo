@@ -238,9 +238,6 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadUserProfile();
   }, [isAuthenticated]);
 
-<<<<<<< HEAD
-  // Clear any cached client state on start to ensure 100% backend synchronization
-=======
   // Load cart state from LocalStorage on client start
   useEffect(() => {
     try {
@@ -254,9 +251,6 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.warn("Failed to load cart state from localStorage", e);
     }
   }, []);
-
-  // Synchronize authenticated merchant profile store into stores state & set activeStoreId
->>>>>>> 2e40220eb48d17b4522094737535cfebb046b5ab
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {

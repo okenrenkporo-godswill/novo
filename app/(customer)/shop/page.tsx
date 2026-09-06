@@ -17,51 +17,23 @@ function ShopContent() {
   const storeParam = searchParams.get("store") || "";
   const { stores, products, addToCart } = usePlatform();
 
-<<<<<<< HEAD
-  const store =
-    stores.find(
-      (s) =>
-        s.id === storeParam ||
-        s.slug === storeParam ||
-        (s.name && s.name.toLowerCase() === storeParam.toLowerCase())
-    ) || stores[0];
-=======
   const selectedStore = storeParam
     ? stores.find(
         (s) =>
           s.id === storeParam ||
           s.slug === storeParam ||
-          s.name.toLowerCase() === storeParam.toLowerCase()
+          (s.name && s.name.toLowerCase() === storeParam.toLowerCase())
       )
     : null;
->>>>>>> 2e40220eb48d17b4522094737535cfebb046b5ab
 
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-<<<<<<< HEAD
-  if (!store) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 px-4 text-center">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">Store Not Found</h2>
-        <p className="text-slate-500 text-sm">We couldn&apos;t find the store you are looking for.</p>
-        <a href="/" className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-colors">
-          Return Home
-        </a>
-      </div>
-    );
-  }
-
-  const storeProducts = products.filter((p) => p.storeId === store.id);
-
-  const categories = ["All", ...Array.from(new Set(storeProducts.map((p) => p.category)))];
-=======
   // If a specific store is selected
   if (selectedStore) {
     const storeProducts = products.filter((p) => p.storeId === selectedStore.id);
     const categories = ["All", ...Array.from(new Set(storeProducts.map((p) => p.category)))];
->>>>>>> 2e40220eb48d17b4522094737535cfebb046b5ab
 
     const filteredProducts = storeProducts.filter((p) => {
       const matchesCat = activeCategory === "All" || p.category === activeCategory;
@@ -234,13 +206,6 @@ function ShopContent() {
   );
 
   return (
-<<<<<<< HEAD
-    <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      {/* Store Cover Header */}
-      <div className="relative w-full h-56 sm:h-72 bg-slate-800 overflow-hidden">
-        <img src={store.banner || ""} alt={store.name || "Store banner"} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
-=======
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
@@ -252,7 +217,6 @@ function ShopContent() {
             Explore all registered restaurants, supermarkets, and pharmacies on Novo.
           </p>
         </div>
->>>>>>> 2e40220eb48d17b4522094737535cfebb046b5ab
 
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
