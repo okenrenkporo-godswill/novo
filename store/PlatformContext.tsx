@@ -63,7 +63,8 @@ interface PlatformContextType {
   placeOrder: (
     deliveryAddress: string,
     paymentMethod: "card" | "cash" | "transfer",
-    tipAmount: number
+    tipAmount: number,
+    existingBackendOrder?: any
   ) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
   rateOrder: (orderId: string, storeRating: number, riderRating: number, comment: string) => void;
@@ -92,7 +93,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [currentUser, setCurrentUser] = useState<User>({
     id: "",
-    name: "Guest User",
+    name: "",
     email: "",
     phone: "",
     role: "customer",
@@ -170,7 +171,15 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const loginUser = (token: string, email?: string) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("access_token", token);
-      if (email) localStorage.setItem("user_email", email);
+      document.cookie = `access_token=${token}; path=/; max-age=2592000`;
+      if (email) {
+        localStorage.setItem("user_email", email);
+        if (email.toLowerCase().includes("admin") || email === "admin@novo.ng") {
+          localStorage.setItem("novo_role", "admin");
+          document.cookie = `novo_role=admin; path=/; max-age=2592000`;
+          setCurrentRole("admin");
+        }
+      }
     }
     setIsAuthenticated(true);
   };
@@ -180,11 +189,14 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_email");
       localStorage.removeItem("merchant_profile");
+      localStorage.removeItem("novo_role");
+      document.cookie = `access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+      document.cookie = `novo_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     }
     setIsAuthenticated(false);
     setCurrentUser({
       id: "",
-      name: "Guest User",
+      name: "",
       email: "",
       phone: "",
       role: "customer",
@@ -200,15 +212,23 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         try {
           const profile = await apiService.getMe();
           if (profile) {
+            const userRole = profile.role || (profile.email?.includes("admin") ? "admin" : "customer");
             setCurrentUser({
               id: profile.id || profile.user_id || "usr-me",
               name: profile.full_name || profile.name || profile.email?.split("@")[0] || "User",
               email: profile.email || "",
               phone: profile.phone || "",
-              role: profile.role || "customer",
+              role: userRole as UserRole,
               address: profile.address || "",
               createdAt: profile.created_at || new Date().toISOString(),
             });
+            if (userRole === "admin" || userRole === "super_admin") {
+              setCurrentRole("admin");
+              if (typeof window !== "undefined") {
+                localStorage.setItem("novo_role", "admin");
+                document.cookie = `novo_role=admin; path=/; max-age=2592000`;
+              }
+            }
           }
         } catch (e) {
           console.warn("Failed to load user profile in PlatformContext:", e);
@@ -218,7 +238,25 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     loadUserProfile();
   }, [isAuthenticated]);
 
+<<<<<<< HEAD
   // Clear any cached client state on start to ensure 100% backend synchronization
+=======
+  // Load cart state from LocalStorage on client start
+  useEffect(() => {
+    try {
+      localStorage.removeItem("novo_platform_state_v1");
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.cart && Array.isArray(parsed.cart)) setCart(parsed.cart);
+      }
+    } catch (e) {
+      console.warn("Failed to load cart state from localStorage", e);
+    }
+  }, []);
+
+  // Synchronize authenticated merchant profile store into stores state & set activeStoreId
+>>>>>>> 2e40220eb48d17b4522094737535cfebb046b5ab
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -279,9 +317,12 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setProducts(formattedProducts);
         }
 
-        const backendOrders = await apiService.getOrders();
-        if (Array.isArray(backendOrders) && backendOrders.length > 0) {
-          setOrders(backendOrders);
+        const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+        if (token) {
+          const backendOrders = await apiService.getOrders(undefined, token);
+          if (Array.isArray(backendOrders) && backendOrders.length > 0) {
+            setOrders(backendOrders);
+          }
         }
       } catch (e) {
         console.error("Failed to load backend stores/products in PlatformContext:", e);
@@ -401,33 +442,59 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const placeOrder = (
     deliveryAddress: string,
     paymentMethod: "card" | "cash" | "transfer",
-    tipAmount = 0
+    tipAmount = 0,
+    existingBackendOrder?: any
   ): Order => {
     const targetStoreId = cart[0]?.product?.storeId || (cart[0]?.product as any)?.store_id;
     const store = stores.find((s) => s.id === targetStoreId) || stores[0];
-    const newOrder: Order = {
-      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
-      customerId: currentUser.id,
-      customerName: currentUser.name,
-      customerPhone: currentUser.phone,
-      deliveryAddress: deliveryAddress || currentUser.address || "14 Commercial Avenue, Central District",
-      storeId: targetStoreId || store.id,
-      storeName: store.name,
-      storeAddress: store.address,
-      items: [...cart],
-      subtotal: cartSubtotal,
-      deliveryFee: cartDeliveryFee,
-      serviceFee: cartServiceFee,
-      tip: tipAmount,
-      total: cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount,
-      status: "pending_merchant",
-      paymentMethod,
-      paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
-      pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
-      estimatedDeliveryMinutes: 25,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+
+    const newOrder: Order = existingBackendOrder
+      ? {
+          id: existingBackendOrder.id,
+          customerId: existingBackendOrder.customer_id || currentUser.id,
+          customerName: existingBackendOrder.customer_name || currentUser.name || "Customer",
+          customerPhone: currentUser.phone || "",
+          deliveryAddress: existingBackendOrder.delivery_address || deliveryAddress,
+          storeId: targetStoreId || store.id,
+          storeName: store?.name || "Merchant Store",
+          storeAddress: store?.address || "",
+          items: [...cart],
+          subtotal: existingBackendOrder.subtotal || cartSubtotal,
+          deliveryFee: existingBackendOrder.delivery_fee || cartDeliveryFee,
+          serviceFee: existingBackendOrder.service_fee || cartServiceFee,
+          tip: existingBackendOrder.tip || tipAmount,
+          total: existingBackendOrder.total || (cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount),
+          status: "pending_merchant",
+          paymentMethod,
+          paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
+          pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
+          estimatedDeliveryMinutes: 25,
+          createdAt: existingBackendOrder.created_at || new Date().toISOString(),
+          updatedAt: existingBackendOrder.updated_at || new Date().toISOString(),
+        }
+      : {
+          id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+          customerId: currentUser.id,
+          customerName: currentUser.name,
+          customerPhone: currentUser.phone,
+          deliveryAddress: deliveryAddress || currentUser.address || "14 Commercial Avenue, Central District",
+          storeId: targetStoreId || store?.id,
+          storeName: store?.name || "Merchant Store",
+          storeAddress: store?.address,
+          items: [...cart],
+          subtotal: cartSubtotal,
+          deliveryFee: cartDeliveryFee,
+          serviceFee: cartServiceFee,
+          tip: tipAmount,
+          total: cartSubtotal + cartDeliveryFee + cartServiceFee + tipAmount,
+          status: "pending_merchant",
+          paymentMethod,
+          paymentStatus: paymentMethod === "cash" ? "pending" : "paid",
+          pickupCode: String(Math.floor(1000 + Math.random() * 9000)),
+          estimatedDeliveryMinutes: 25,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
 
     setOrders((prev) => [newOrder, ...prev]);
     clearCart();

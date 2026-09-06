@@ -73,8 +73,9 @@ function AuthContent() {
         const result = await apiService.login({ email, password });
         if (result && result.access_token) {
           loginUser(result.access_token, email);
-          setSuccessMsg("Welcome back! Signing in to your portal...");
-          handleRouteRedirect("customer");
+          const targetRole: UserRole = email.toLowerCase().includes("admin") || email === "admin@novo.ng" ? "admin" : "customer";
+          setSuccessMsg(`Welcome back! Redirecting to ${targetRole === "admin" ? "Admin Portal" : "Novo"}...`);
+          handleRouteRedirect(targetRole);
         } else {
           throw new Error("Invalid email or password");
         }
@@ -105,11 +106,11 @@ function AuthContent() {
   };
 
   return (
-    <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col gap-6">
+    <div className="w-full max-w-sm sm:max-w-md flex flex-col gap-3 py-2 text-slate-900 dark:text-slate-100">
       {/* LOGO & TITLE */}
-      <div className="flex flex-col items-center text-center gap-3">
-        <NovoLogo subtitle="Delivery Express" size="lg" />
-        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+      <div className="flex flex-col items-center text-center gap-2">
+        <NovoLogo subtitle="Delivery Express" size="md" />
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
           {isOtpStep
             ? "Verify Email OTP"
             : isLogin
@@ -125,21 +126,21 @@ function AuthContent() {
 
       {/* FEEDBACK ALERTS */}
       {errorMsg && (
-        <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+        <div className="p-3 bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2 animate-in fade-in">
+        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* AUTH FORM */}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         {isOtpStep ? (
           <Input
             label="Verification Code (OTP)"
@@ -196,7 +197,7 @@ function AuthContent() {
           type="submit"
           size="lg"
           disabled={isLoading}
-          className="w-full mt-2 py-3.5 text-xs font-black"
+          className="w-full mt-1 py-3 text-xs font-black rounded-none"
           rightIcon={
             isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -217,7 +218,7 @@ function AuthContent() {
 
       {/* TOGGLE LOGIN / SIGNUP */}
       {!isOtpStep && (
-        <div className="flex flex-col gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col gap-2 pt-1">
           <div className="flex items-center justify-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             <span>{isLogin ? "Don't have an account?" : "Already have an account?"}</span>
             <button
@@ -233,14 +234,14 @@ function AuthContent() {
             </button>
           </div>
 
-          {/* DEDICATED MERCHANT PARTNER LINK (Glover / Chowdeck style) */}
-          <div className="mt-2 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 text-center">
+          {/* DEDICATED MERCHANT PARTNER LINK */}
+          <div className="mt-1 p-2.5 bg-slate-100/70 dark:bg-slate-900/80 text-center">
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
               Want to list your restaurant, supermarket, or pharmacy?
             </p>
             <Link
               href="/merchant/register"
-              className="inline-flex items-center gap-1 mt-1 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 hover:underline"
+              className="inline-flex items-center gap-1 mt-0.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 hover:underline"
             >
               <Store className="w-3.5 h-3.5" />
               <span>Register Your Business on Novo</span>
@@ -264,7 +265,7 @@ function AuthContent() {
 
 export default function AuthPage() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 overflow-hidden select-none">
       <Suspense
         fallback={
           <div className="flex flex-col items-center justify-center gap-3 p-8">

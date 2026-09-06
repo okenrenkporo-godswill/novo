@@ -29,10 +29,10 @@ export const Input: React.FC<InputProps> = ({
           <div className="absolute left-3 text-slate-400 pointer-events-none">{leftIcon}</div>
         )}
         <input
-          className={`w-full rounded-xl bg-white dark:bg-slate-900 border text-slate-900 dark:text-slate-100 text-sm transition-all outline-none ${
+          className={`w-full bg-[#F8FAF9] dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm outline-none ${
             error
-              ? "border-rose-500 focus:ring-2 focus:ring-rose-500/20"
-              : "border-slate-200 dark:border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:focus:border-emerald-500"
+              ? "text-rose-500"
+              : ""
           } ${leftIcon ? "pl-10" : "px-4"} ${rightIcon ? "pr-10" : "px-4"} py-3 ${className}`}
           {...props}
         />

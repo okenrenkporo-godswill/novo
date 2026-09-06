@@ -1,6 +1,6 @@
 import { Store, Product, Order, RiderProfile, PlatformAnalytics, Review } from "@/types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
 
 // Helper for authorized headers
 const getAuthHeaders = (token?: string) => {
@@ -414,6 +414,28 @@ export const apiService = {
     return data;
   },
 
+  recordPaymentTransaction: async (
+    paymentId: string,
+    payload: { provider_tx_id?: string; amount: number; currency?: string; status: string; raw_response?: any },
+    token?: string
+  ) => {
+    const res = await fetch(`${API_BASE_URL}/payments/${paymentId}/transactions`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Recording transaction failed");
+    return data;
+  },
+
+  verifyPayment: async (reference: string) => {
+    const res = await fetch(`${API_BASE_URL}/payments/verify/${reference}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Payment verification failed");
+    return data.data || data;
+  },
+
   // 10. WALLETS MODULE (/api/v1/wallets)
   getWallets: async (token?: string) => {
     const res = await fetch(`${API_BASE_URL}/wallets`, {
@@ -544,7 +566,44 @@ export const apiService = {
     return data;
   },
 
-  // 15. ANALYTICS MODULE (/api/v1/analytics)
+  // 15. RIDERS & ADMIN MANAGEMENT MODULE
+  deactivateRider: async (riderId: string, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/riders/${riderId}/deactivate`, {
+      method: "PATCH",
+      headers: getAuthHeaders(token),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Deactivating rider failed");
+    return data;
+  },
+
+  toggleMerchantStatus: async (merchantId: string, is_active: boolean, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/merchants/${merchantId}/status`, {
+      method: "PATCH",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify({ is_active }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Toggling merchant status failed");
+    return data;
+  },
+
+  getUsers: async (token?: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/users`, {
+        headers: getAuthHeaders(token),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        return result.data || result;
+      }
+    } catch (e) {
+      console.warn("Failed to fetch users:", e);
+    }
+    return [];
+  },
+
+  // 16. ANALYTICS MODULE (/api/v1/analytics)
   getAnalytics: async (token?: string): Promise<PlatformAnalytics> => {
     try {
       const res = await fetch(`${API_BASE_URL}/analytics`, {
@@ -568,4 +627,104 @@ export const apiService = {
       commissionEarned: 0,
     };
   },
+
+  // 17. PRICING & PROMOTIONS ENGINE MODULE (/api/v1/pricing)
+  calculatePricing: async (payload: {
+    subtotal: number;
+    merchant_id?: string;
+    user_id?: string;
+    promo_code?: string;
+    distance_km?: number;
+  }) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/calculate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Pricing calculation failed");
+    return data;
+  },
+
+  validatePromoCode: async (payload: {
+    code: string;
+    subtotal: number;
+    merchant_id?: string;
+    user_id?: string;
+  }) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/validate-promo`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Promo code validation failed");
+    return data;
+  },
+
+  getCommissionRules: async (token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/commission`, {
+      headers: getAuthHeaders(token),
+    });
+    return res.ok ? await res.json() : [];
+  },
+
+  saveCommissionRule: async (payload: any, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/commission`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  },
+
+  getDeliveryRules: async (token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/delivery`, {
+      headers: getAuthHeaders(token),
+    });
+    return res.ok ? await res.json() : [];
+  },
+
+  saveDeliveryRule: async (payload: any, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/delivery`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  },
+
+  getServiceFeeRules: async (token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/service-fee`, {
+      headers: getAuthHeaders(token),
+    });
+    return res.ok ? await res.json() : [];
+  },
+
+  saveServiceFeeRule: async (payload: any, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/rules/service-fee`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  },
+
+  getPromotions: async (token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/promotions`, {
+      headers: getAuthHeaders(token),
+    });
+    return res.ok ? await res.json() : [];
+  },
+
+  createPromotion: async (payload: any, token?: string) => {
+    const res = await fetch(`${API_BASE_URL}/pricing/promotions`, {
+      method: "POST",
+      headers: getAuthHeaders(token),
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  },
 };
+
+export const api = apiService;

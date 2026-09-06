@@ -113,7 +113,7 @@ export default function MerchantRegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAF9] dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 font-sans text-[#17201D] dark:text-slate-100">
-      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/80 dark:border-slate-800 flex flex-col gap-6">
+      <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-none p-6 sm:p-8 flex flex-col gap-6">
         <div className="flex flex-col items-center text-center gap-3">
           <NovoLogo subtitle="Merchant Registration" size="lg" href="/merchant" />
           <h2 className="text-xl font-black text-slate-900 dark:text-white">Partner with Novo</h2>
@@ -128,11 +128,11 @@ export default function MerchantRegisterPage() {
 
         {/* STEP PROGRESS */}
         <div className="flex items-center justify-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black ${step >= 1 ? "bg-[#087F5B] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
+          <div className={`w-8 h-8 rounded-none flex items-center justify-center text-xs font-black ${step >= 1 ? "bg-[#087F5B] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
             1
           </div>
           <div className={`w-12 h-0.5 ${step >= 2 ? "bg-[#087F5B]" : "bg-slate-200 dark:bg-slate-800"}`} />
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black ${step >= 2 ? "bg-[#087F5B] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
+          <div className={`w-8 h-8 rounded-none flex items-center justify-center text-xs font-black ${step >= 2 ? "bg-[#087F5B] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
             2
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="e.g. Godswill Okenrenkporo"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -160,7 +160,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="owner@restaurant.com"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+234 803 123 4567"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -184,7 +184,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -193,7 +193,7 @@ export default function MerchantRegisterPage() {
                 onClick={() => {
                   if (fullName && email && phone && password) setStep(2);
                 }}
-                className="w-full mt-2 py-3 rounded-2xl bg-[#087F5B] text-white text-xs font-black flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#087F5B]/20"
+                className="w-full mt-2 py-3 bg-[#087F5B] text-white text-xs font-black flex items-center justify-center gap-2 cursor-pointer rounded-none"
               >
                 <span>Continue to Business Details</span>
                 <ArrowRight className="w-4 h-4" />
@@ -211,7 +211,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="e.g. Suya Kingdom & Fast Food"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -220,7 +220,7 @@ export default function MerchantRegisterPage() {
                 <select
                   value={businessType}
                   onChange={(e) => setBusinessType(e.target.value)}
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 >
                   <option value="restaurant">Restaurant / Fast Food 🍲</option>
                   <option value="supermarket">Supermarket / Groceries 🛍️</option>
@@ -237,7 +237,7 @@ export default function MerchantRegisterPage() {
                   onChange={(e) => setAddress(e.target.value)}
                   placeholder="e.g. 14 Commercial Avenue, Central District, Sapele"
                   required
-                  className="w-full mt-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white outline-none"
+                  className="w-full mt-1 p-3 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none rounded-none"
                 />
               </div>
 
@@ -245,14 +245,14 @@ export default function MerchantRegisterPage() {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="py-3 px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold cursor-pointer"
+                  className="py-3 px-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold cursor-pointer rounded-none"
                 >
                   Back
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 rounded-2xl bg-[#087F5B] text-white text-xs font-black cursor-pointer shadow-md shadow-[#087F5B]/20"
+                  className="flex-1 py-3 bg-[#087F5B] text-white text-xs font-black cursor-pointer rounded-none"
                 >
                   {loading ? "Creating Business Profile..." : "Complete Registration"}
                 </button>
@@ -261,7 +261,7 @@ export default function MerchantRegisterPage() {
           )}
         </form>
 
-        <div className="text-center pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+        <div className="text-center pt-2 text-xs">
           <span className="text-[#66736E] dark:text-slate-400">Already registered? </span>
           <Link href="/merchant/login" className="font-black text-[#087F5B] hover:underline">Sign In</Link>
         </div>
