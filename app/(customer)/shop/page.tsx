@@ -11,6 +11,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Product } from "@/types";
 
+import { MobileStoreView } from "@/components/mobile/store/MobileStoreView";
+
 function ShopContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -44,7 +46,9 @@ function ShopContent() {
     });
 
     return (
-      <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+      <>
+        <MobileStoreView />
+        <div className="hidden md:flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
         {/* Store Cover Header */}
         <div className="relative w-full h-56 sm:h-72 bg-slate-800 overflow-hidden">
           <img src={selectedStore.banner} alt={selectedStore.name} className="w-full h-full object-cover" />
@@ -88,26 +92,8 @@ function ShopContent() {
           </div>
         </div>
 
-        {/* Special Offer Banner (Screen 6) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-[#087F5B] text-white flex items-center justify-between shadow-md">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-white/20">
-                <Star className="w-4 h-4 text-amber-300 fill-amber-300" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black">Special Offer</h4>
-                <p className="text-[11px] text-emerald-100">Up to 20% off on selected menu items</p>
-              </div>
-            </div>
-            <button className="px-3.5 py-1.5 rounded-xl bg-white text-[#087F5B] text-xs font-black hover:bg-emerald-50 transition-transform active:scale-95 shadow-sm">
-              View
-            </button>
-          </div>
-        </div>
-
         {/* Menu Navigation & Search */}
-        <div className="sticky top-0 sm:top-16 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md mt-4">
+        <div className="sticky top-16 z-30 bg-white/95 dark:bg-slate-900/95 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-4">
             {/* Category Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto scrollbar-none">
@@ -117,7 +103,7 @@ function ShopContent() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
                     activeCategory === cat
-                      ? "bg-[#087F5B] text-white shadow-sm"
+                      ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
                       : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
                   }`}
                 >
@@ -141,7 +127,7 @@ function ShopContent() {
         </div>
 
         {/* Product Catalog Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 w-full">
           {filteredProducts.length === 0 ? (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 text-slate-500 font-medium">
               {storeProducts.length === 0
@@ -162,7 +148,7 @@ function ShopContent() {
           )}
         </div>
 
-        {/* PRODUCT DETAILS MODAL (Exact Screen 7: Product Details Sheet) */}
+        {/* PRODUCT DETAILS MODAL */}
         <Modal
           isOpen={!!selectedProduct}
           onClose={() => setSelectedProduct(null)}
@@ -170,70 +156,52 @@ function ShopContent() {
         >
           {selectedProduct && (
             <div className="flex flex-col gap-4">
-              <div className="relative w-full h-52 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
+              <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                 <img
                   src={selectedProduct.image}
                   alt={selectedProduct.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{selectedProduct.name}</h3>
-                <span className="text-base font-black text-[#087F5B] dark:text-emerald-400">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                {selectedProduct.description}
+              </p>
+              {selectedProduct.options && selectedProduct.options.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Select Add-ons
+                  </span>
+                  {selectedProduct.options.map((opt: any) => (
+                    <label
+                      key={opt.id}
+                      className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200"
+                    >
+                      <span>{opt.name}</span>
+                      <span className="text-emerald-600 font-bold">+₦{opt.price}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
+                <span className="text-lg font-black text-slate-900 dark:text-slate-100">
                   ₦{selectedProduct.price.toLocaleString()}
                 </span>
-              </div>
-
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
-                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                <span>4.6 (1.2k reviews)</span>
-              </div>
-
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                {selectedProduct.description || "Juicy beef patty, fresh lettuce, tomato, cheese and our special signature sauce."}
-              </p>
-
-              {/* Add-ons Checklist (Screen 7 Add-ons) */}
-              <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <span className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wider">
-                  Add-ons
-                </span>
-                {[
-                  { name: "Extra Cheese", price: 500 },
-                  { name: "Bacon", price: 800 },
-                  { name: "Extra Patty", price: 1000 },
-                ].map((addon) => (
-                  <label
-                    key={addon.name}
-                    className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer text-xs font-semibold text-slate-800 dark:text-slate-200 hover:border-emerald-500"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <input type="checkbox" className="rounded border-slate-300 text-[#087F5B] focus:ring-[#087F5B]" />
-                      <span>{addon.name}</span>
-                    </div>
-                    <span className="text-[#087F5B] font-bold">+₦{addon.price.toLocaleString()}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 mt-2">
                 <Button
                   variant="primary"
-                  className="w-full bg-[#087F5B] hover:bg-[#065f44] text-white py-3 rounded-2xl font-black text-sm"
                   onClick={() => {
                     addToCart(selectedProduct);
                     setSelectedProduct(null);
                   }}
                 >
-                  Add to Cart • ₦{selectedProduct.price.toLocaleString()}
+                  Add to Cart
                 </Button>
               </div>
             </div>
           )}
         </Modal>
       </div>
-    );
+    </>
+  );
   }
 
   // DEFAULT VIEW: All Stores & Merchants ({stores.length})
@@ -243,49 +211,52 @@ function ShopContent() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
-            All Verified Merchants ({stores.length})
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
-            Explore all registered restaurants, supermarkets, and pharmacies on Novo.
-          </p>
+    <>
+      <MobileStoreView />
+      <div className="hidden md:block max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
+        {/* Header Banner */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+              All Verified Merchants ({stores.length})
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-medium">
+              Explore all registered restaurants, supermarkets, and pharmacies on Novo.
+            </p>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search all merchants..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 text-xs font-medium outline-none text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 shadow-xs"
+            />
+          </div>
         </div>
 
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search all merchants..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 text-xs font-medium outline-none text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 shadow-xs"
-          />
-        </div>
+        {/* Stores Grid */}
+        {filteredStores.length === 0 ? (
+          <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3">
+            <StoreIcon className="w-12 h-12 text-slate-400" />
+            <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">No Merchants Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm">
+              {stores.length === 0
+                ? "No merchants have registered on the backend yet."
+                : `No store matching "${searchQuery}".`}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredStores.map((st) => (
+              <RestaurantCard key={st.id} store={st} />
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Stores Grid */}
-      {filteredStores.length === 0 ? (
-        <div className="p-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 flex flex-col items-center gap-3">
-          <StoreIcon className="w-12 h-12 text-slate-400" />
-          <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">No Merchants Found</h3>
-          <p className="text-xs text-slate-500 max-w-sm">
-            {stores.length === 0
-              ? "No merchants have registered on the backend yet."
-              : `No store matching "${searchQuery}".`}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredStores.map((st) => (
-            <RestaurantCard key={st.id} store={st} />
-          ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 

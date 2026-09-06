@@ -21,13 +21,8 @@ import {
   Store as StoreIcon,
   PlusCircle,
 } from "lucide-react";
-import { usePlatform } from "@/store/PlatformContext";
-import { RestaurantCard } from "@/components/cards/RestaurantCard";
-import { ProductCard } from "@/components/cards/ProductCard";
-import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/shared/ThemeToggle";
-import { NovoLogo } from "@/components/shared/NovoLogo";
+import { MobileHomeView } from "@/components/mobile/home/MobileHomeView";
+import { MobileSplashOnboarding } from "@/components/mobile/navigation/MobileSplashOnboarding";
 import { Product } from "@/types";
 
 export default function CustomerHomePage() {
@@ -147,124 +142,167 @@ export default function CustomerHomePage() {
   const currentSlide = heroSlides[activeSlide] || heroSlides[0];
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 font-sans">
-      {/* 1. EMERALD GREEN HERO HEADER & MOBILE NAVIGATION (#087F5B) */}
-      <section className="relative w-full bg-[#087F5B] text-white overflow-hidden pb-8 sm:pb-32">
+    <>
+      <MobileSplashOnboarding />
+      <MobileHomeView />
+      <div className="hidden md:flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 font-sans">
+      {/* 1. VIBRANT EMERALD GREEN HERO BANNER (#087F5B) */}
+      <section className="relative w-full bg-gradient-to-b from-[#099268] via-[#087F5B] to-[#066347] text-white overflow-hidden pb-28 sm:pb-36">
+        
         {/* Multi-tone Ambient Lighting */}
-        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-white/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl pointer-events-none" />
 
-        {/* INTEGRATED FULL HEADER */}
-        <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-3 flex flex-col gap-3 relative z-30">
-          {/* Top Bar: Location & Actions */}
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2 text-white">
-              <div className="p-1.5 rounded-full bg-white/20">
-                <MapPin className="w-4 h-4 text-emerald-200" />
-              </div>
-              <button
-                onClick={handleUseMyLocation}
-                className="flex items-center gap-1 text-xs font-bold text-white hover:text-emerald-100 transition-colors"
+        {/* INTEGRATED FULL HEADER INSIDE HERO BANNER */}
+        <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between relative z-30">
+          {/* Logo */}
+          <NovoLogo variant="white" subtitle="Delivery Express" size="md" />
+
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-1 bg-white/15 backdrop-blur-lg px-4 py-1.5 rounded-2xl border border-white/20 shadow-inner">
+            {[
+              { label: "Home", href: "/" },
+              { label: "Shop", href: "/shop" },
+              { label: "Orders", href: "/orders" },
+              { label: "Profile", href: "/profile" },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                  item.href === "/"
+                    ? "bg-white text-[#087F5B] shadow-lg font-black"
+                    : "text-white hover:bg-white/20"
+                }`}
               >
-                <span>{isLocating ? "Detecting location..." : deliveryLocation}</span>
-                <span className="text-[10px] opacity-80">▼</span>
-              </button>
-            </div>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-            {/* Desktop Brand Logo & Right Controls */}
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:block">
-                <NovoLogo variant="white" subtitle="Delivery Express" size="md" />
-              </div>
-              <ThemeToggle />
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2 rounded-2xl bg-white/20 hover:bg-white/30 text-white transition-all cursor-pointer shadow-md"
+          {/* Header Action Controls */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+
+            {/* Cart Trigger */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white transition-all active:scale-95 cursor-pointer shadow-lg"
+            >
+              <ShoppingBag className="w-5 h-5 text-emerald-200" />
+              {totalCartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-white text-[#087F5B] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#087F5B] shadow-md animate-in zoom-in-50">
+                  {totalCartCount}
+                </span>
+              )}
+            </button>
+
+            {/* Account / Login */}
+            {!isAuthenticated ? (
+              <Link
+                href="/auth"
+                className="px-4 py-2 rounded-xl text-xs font-black bg-white text-[#087F5B] hover:bg-emerald-50 transition-all active:scale-95 cursor-pointer shadow-md"
               >
-                <ShoppingBag className="w-5 h-5 text-white" />
-                {totalCartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-white text-[#087F5B] text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-[#087F5B]">
-                    {totalCartCount}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Search Bar Input (Screen 4 Search for restaurants, stores, phar...) */}
-          <div className="relative w-full mt-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search for restaurants, stores, pharmacy..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white text-slate-900 placeholder:text-slate-400 text-xs font-medium outline-none shadow-md border-0 focus:ring-2 focus:ring-emerald-300"
-            />
+                Sign In
+              </Link>
+            ) : (
+              <Link
+                href="/profile"
+                className="px-4 py-2 rounded-xl text-xs font-black bg-white/20 hover:bg-white/30 text-white border border-white/30 transition-all active:scale-95 cursor-pointer shadow-md"
+              >
+                {currentUser?.name || "Account"}
+              </Link>
+            )}
           </div>
         </header>
 
-        {/* HERO PROMO BANNER (Good Food Great Vibes - Screen 4) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-3 sm:mt-6">
-          <div className="relative w-full rounded-3xl bg-gradient-to-r from-[#045239] via-[#087F5B] to-[#099268] p-5 sm:p-8 text-white overflow-hidden shadow-2xl border border-white/20 flex items-center justify-between">
-            <div className="flex flex-col gap-2 max-w-[60%] sm:max-w-md z-10">
-              <h2 className="text-xl sm:text-3xl font-black leading-tight tracking-tight text-white">
-                Good Food Great Vibes
-              </h2>
-              <p className="text-[11px] sm:text-sm text-emerald-100 font-medium line-clamp-2">
-                Fresh meals from your favourite restaurants delivered fast.
+        {/* HERO CONTENT GRID */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-4 sm:mt-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          {/* Left Column */}
+          <div className="lg:col-span-6 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
+            
+            {/* DYNAMIC SYNCHRONIZED HERO HEADLINE MATCHING BACKEND DATA */}
+            <div className="flex flex-col gap-4 items-center lg:items-start">
+              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight min-h-[100px] sm:min-h-[130px]">
+                <span
+                  key={activeSlide}
+                  className="inline-block animate-in fade-in slide-in-from-bottom-3 duration-500 text-white"
+                >
+                  {currentSlide.text}
+                </span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-emerald-100 font-medium max-w-md">
+                {currentSlide.caption}
               </p>
+
               <Link
-                href="/shop"
-                className="mt-2 px-4 py-2 rounded-xl bg-white text-[#087F5B] text-xs font-black w-fit hover:bg-emerald-50 transition-transform active:scale-95 shadow-md"
+                href={currentSlide.href || `/shop?category=${currentSlide.category}`}
+                className="w-fit px-8 py-3.5 rounded-2xl bg-white text-[#087F5B] hover:bg-emerald-50 text-sm font-black transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer mt-2"
               >
-                Order Now
+                <span>Explore Store &amp; Order</span>
+                <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
+          </div>
 
-            {/* Banner Food Circle Showcase Image */}
-            <div className="relative w-28 h-28 sm:w-44 sm:h-44 rounded-full overflow-hidden border-4 border-white/30 shadow-2xl shrink-0 group">
+          {/* Right Column: Hero Media Showcase */}
+          <div className="lg:col-span-6 flex flex-col items-center">
+            <div className="relative w-full max-w-xl lg:max-w-2xl h-80 sm:h-[420px] lg:h-[450px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 group">
               <img
                 src={currentSlide.image}
-                alt="Promo Food"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                alt={currentSlide.caption}
+                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#043324]/90 via-transparent to-transparent" />
+              
+              {/* Slide Caption Card */}
+              <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-[#087F5B]/85 backdrop-blur-md border border-white/20 flex items-center justify-between shadow-lg">
+                <div>
+                  <h4 className="text-sm font-black text-white">{currentSlide.text}</h4>
+                  <span className="text-[11px] font-semibold text-emerald-200">{currentSlide.caption}</span>
+                </div>
+                <Link
+                  href={currentSlide.href || "/shop"}
+                  className="p-2 rounded-xl bg-white text-[#087F5B] hover:bg-emerald-50 transition-colors shadow-sm cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </Link>
+              </div>
             </div>
           </div>
+
+        </div>
+
+        {/* ORGANIC SVG WAVE BOTTOM DIVIDER */}
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none z-10">
+          <svg
+            className="relative block w-full h-12 sm:h-20 lg:h-24 text-slate-50 dark:text-slate-950"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            fill="currentColor"
+          >
+            <path d="M0,0 C150,90 350,-40 500,45 C650,130 900,10 1200,50 L1200,120 L0,120 Z"></path>
+          </svg>
         </div>
       </section>
 
-      {/* 2. CIRCULAR CATEGORY QUICK ICONS (Screen 4: Food, Groceries, Pharmacy, More) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full">
-        <div className="grid grid-cols-4 sm:flex sm:items-center gap-3 sm:gap-6 justify-between">
-          {[
-            { id: "restaurant", label: "Food", icon: "🍴", color: "bg-emerald-100 text-[#087F5B] dark:bg-emerald-950 dark:text-emerald-300" },
-            { id: "supermarket", label: "Groceries", icon: "🛒", color: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300" },
-            { id: "pharmacy", label: "Pharmacy", icon: "💊", color: "bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300" },
-            { id: "all", label: "More", icon: "🎛️", color: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
-          ].map((cat) => (
+      {/* 2. DYNAMIC CATEGORY BADGES */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full relative z-20">
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+          {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className="flex flex-col items-center gap-2 group cursor-pointer"
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
+                selectedCategory === cat.id
+                  ? "bg-[#087F5B] text-white shadow-md ring-2 ring-[#087F5B]/50"
+                  : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
             >
-              <div
-                className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl shadow-xs transition-transform duration-200 group-hover:scale-110 ${
-                  selectedCategory === cat.id
-                    ? "ring-2 ring-[#087F5B] bg-[#087F5B] text-white shadow-lg"
-                    : cat.color
-                }`}
-              >
-                {cat.icon}
-              </div>
-              <span
-                className={`text-xs font-bold ${
-                  selectedCategory === cat.id
-                    ? "text-[#087F5B] dark:text-emerald-400 font-extrabold"
-                    : "text-slate-700 dark:text-slate-300"
-                }`}
-              >
-                {cat.label}
-              </span>
+              {cat.icon}
+              <span>{cat.label}</span>
             </button>
           ))}
         </div>
@@ -531,6 +569,7 @@ export default function CustomerHomePage() {
         )}
       </Modal>
     </div>
-  );
+  </>
+);
 }
 

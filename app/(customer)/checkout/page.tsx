@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { apiService } from "@/services/api";
 
+import { MobileCheckoutView } from "@/components/mobile/checkout/MobileCheckoutView";
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, cartSubtotal, cartDeliveryFee, currentUser, placeOrder } = usePlatform();
@@ -167,10 +169,12 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <Script
-        src="https://js.paystack.co/v1/inline.js"
-        onLoad={() => setPaystackLoaded(true)}
-      />
+      <MobileCheckoutView />
+      <div className="hidden md:block">
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          onLoad={() => setPaystackLoaded(true)}
+        />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full min-h-screen">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 mb-6">
           Checkout & Payment
@@ -318,7 +322,7 @@ export default function CheckoutPage() {
                 size="lg"
                 isLoading={isSubmitting}
                 onClick={handlePlaceOrder}
-                className="mt-2 w-full bg-[#087F5B] hover:bg-[#065f44] text-white py-3.5 rounded-2xl font-black text-sm"
+                className="mt-2 w-full"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
               >
                 {paymentMethod === "card" ? "Pay with Paystack" : "Place Order"} • ₦{total.toLocaleString()}
@@ -327,7 +331,8 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 }
 
