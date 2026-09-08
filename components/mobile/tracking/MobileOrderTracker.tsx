@@ -37,7 +37,7 @@ export function MobileOrderTracker({ order, onBack }: MobileOrderTrackerProps) {
       key: "delivery",
       label: "Out For Delivery",
       time: "10:42 AM",
-      done: order.status === "on_the_way" || order.status === "delivered",
+      done: order.status === "out_for_delivery" || order.status === "picked_up" || order.status === "delivered",
     },
     { key: "arriving", label: "Arriving Soon", time: "10:54 AM", done: order.status === "delivered" },
   ];

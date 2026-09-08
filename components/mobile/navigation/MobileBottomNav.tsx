@@ -3,13 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, ShoppingBag, User, PackageCheck } from "lucide-react";
-import { usePlatform } from "@/store/PlatformContext";
+import { Home, Search, User, PackageCheck } from "lucide-react";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
-  const { cart, setIsCartOpen } = usePlatform();
-  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Hide bottom nav on merchant, rider, and admin routes
   if (pathname.startsWith("/merchant") || pathname.startsWith("/rider") || pathname.startsWith("/admin")) {
@@ -20,7 +17,6 @@ export function MobileBottomNav() {
     { label: "Home", href: "/", icon: Home },
     { label: "Search", href: "/shop", icon: Search },
     { label: "Orders", href: "/orders", icon: PackageCheck },
-    { label: "Cart", href: "/cart", icon: ShoppingBag, isCart: true },
     { label: "Account", href: "/profile", icon: User },
   ];
 
@@ -32,26 +28,6 @@ export function MobileBottomNav() {
           item.href === "/"
             ? pathname === "/"
             : pathname.startsWith(item.href) && item.href !== "/";
-
-        if (item.isCart) {
-          return (
-            <button
-              key={item.label}
-              onClick={() => setIsCartOpen(true)}
-              className="relative flex flex-col items-center justify-center gap-1 py-1 px-3 text-slate-500 hover:text-[#008A4C] transition-colors cursor-pointer min-w-[56px] min-h-[44px]"
-            >
-              <div className="relative">
-                <Icon className="w-5 h-5 text-[#66736D] dark:text-slate-400" />
-                {totalCartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-[#008A4C] text-white text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center border border-white dark:border-slate-900 shadow-xs">
-                    {totalCartCount}
-                  </span>
-                )}
-              </div>
-              <span className="text-[10px] font-bold text-[#66736D] dark:text-slate-400">{item.label}</span>
-            </button>
-          );
-        }
 
         return (
           <Link

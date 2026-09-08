@@ -3,13 +3,14 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Search, User, Clock } from "lucide-react";
+import { Home, Search, User, Clock } from "lucide-react";
 import { usePlatform } from "@/store/PlatformContext";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import { Footer } from "@/components/shared/Footer";
 import { NotificationBell } from "@/components/shared/NotificationBell";
 import { SupportChatWidget } from "@/components/shared/SupportChatWidget";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { NovoLogo } from "@/components/shared/NovoLogo";
 
 import { MobileBottomNav } from "@/components/mobile/navigation/MobileBottomNav";
 
@@ -19,9 +20,7 @@ interface ResponsiveLayoutProps {
 
 export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   const pathname = usePathname();
-  const { cart, isCartOpen, setIsCartOpen, isAuthenticated } = usePlatform();
-
-  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const { isCartOpen, setIsCartOpen, isAuthenticated } = usePlatform();
 
   // Determine active view mode
   const isMerchant = pathname.startsWith("/merchant");
@@ -32,7 +31,7 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
   const isCustomerNavVisible = !isMerchant && !isRider && !isAdmin;
 
   const customerNavItems = [
-    { label: "Home", href: "/", icon: <ShoppingBag className="w-5 h-5" /> },
+    { label: "Home", href: "/", icon: <Home className="w-5 h-5" /> },
     { label: "Shop", href: "/shop", icon: <Search className="w-5 h-5" /> },
     { label: "Orders", href: "/orders", icon: <Clock className="w-5 h-5" /> },
     { label: "Profile", href: "/profile", icon: <User className="w-5 h-5" /> },
@@ -79,18 +78,6 @@ export default function ResponsiveLayout({ children }: ResponsiveLayoutProps) {
             <div className="flex items-center gap-3">
               <ThemeToggle />
               <NotificationBell />
-
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 transition-colors cursor-pointer"
-              >
-                <ShoppingBag className="w-5 h-5" />
-                {totalCartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-sm animate-in zoom-in-50">
-                    {totalCartCount}
-                  </span>
-                )}
-              </button>
 
               {!isAuthenticated && (
                 <Link

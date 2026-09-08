@@ -48,7 +48,6 @@ export function MobileHomeView() {
   };
 
   const featuredStores = stores.slice(0, 5);
-  const popularProducts = products.slice(0, 8);
 
   return (
     <div className="md:hidden flex flex-col w-full min-h-screen bg-[#F7FAF8] dark:bg-slate-950 text-[#101714] dark:text-slate-100 pb-24">
@@ -204,53 +203,6 @@ export function MobileHomeView() {
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* 5. POPULAR NEAR YOU (Product items grid) */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-[#101714] dark:text-white">Popular Near You</h3>
-            <Link href="/shop" className="text-xs font-bold text-[#008A4C]">
-              View Menu
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {popularProducts.map((prod) => (
-              <div
-                key={prod.id}
-                className="flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-[#E3EAE6] dark:border-slate-800 p-2.5 shadow-xs hover:shadow-md transition-all justify-between"
-              >
-                <div className="flex flex-col gap-2">
-                  <div className="relative w-full h-28 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
-                    <img
-                      src={prod.image}
-                      alt={prod.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h4 className="text-xs font-black text-[#101714] dark:text-white line-clamp-1">
-                    {prod.name}
-                  </h4>
-                  <p className="text-[10px] text-[#66736D] dark:text-slate-400 line-clamp-1 font-medium">
-                    {prod.description}
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 mt-2 border-t border-[#E3EAE6] dark:border-slate-800">
-                  <span className="text-xs font-black text-[#101714] dark:text-white">
-                    ₦{prod.price.toLocaleString()}
-                  </span>
-                  <button
-                    onClick={() => addToCart(prod)}
-                    className="w-7 h-7 rounded-xl bg-[#008A4C] hover:bg-[#006B3C] text-white flex items-center justify-center transition-colors cursor-pointer shadow-xs"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
             ))}
           </div>
         </div>

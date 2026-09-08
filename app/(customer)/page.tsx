@@ -23,10 +23,15 @@ import {
 } from "lucide-react";
 import { MobileHomeView } from "@/components/mobile/home/MobileHomeView";
 import { MobileSplashOnboarding } from "@/components/mobile/navigation/MobileSplashOnboarding";
-import { Product } from "@/types";
+import { Product, Store } from "@/types";
+import { usePlatform } from "@/store/PlatformContext";
+import { NovoLogo } from "@/components/shared/NovoLogo";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { ProductCard } from "@/components/cards/ProductCard";
+import { Modal } from "@/components/ui/Modal";
 
 export default function CustomerHomePage() {
-  const { stores, products, cart, addToCart, setIsCartOpen, isAuthenticated, currentUser, activeOrder } = usePlatform();
+  const { stores, products, addToCart, isAuthenticated, currentUser, activeOrder } = usePlatform();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [deliveryLocation, setDeliveryLocation] = useState(currentUser?.address || "Set Delivery Location");
@@ -35,9 +40,6 @@ export default function CustomerHomePage() {
 
   // Synchronized Slide & Text State
   const [activeSlide, setActiveSlide] = useState(0);
-
-
-  const totalCartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   // Update delivery location when currentUser address changes
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function CustomerHomePage() {
   // Dynamically generate Hero Slides from live backend stores or verified categories
   const heroSlides = useMemo(() => {
     if (stores.length > 0) {
-      return stores.slice(0, 5).map((s) => ({
+      return stores.slice(0, 5).map((s: Store) => ({
         image: s.banner || s.logo || "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1000&q=80",
         text: s.name,
         caption: s.description || `${s.name} - Quality items & fast delivery`,
@@ -100,7 +102,7 @@ export default function CustomerHomePage() {
     const defaultCats = [
       { id: "all", label: "All Stores", icon: <ShoppingBag className="w-4 h-4 text-emerald-500" /> },
     ];
-    const uniqueCategories = Array.from(new Set(stores.map((s) => s.category).filter(Boolean)));
+    const uniqueCategories = Array.from(new Set(stores.map((s: Store) => s.category).filter(Boolean)));
     const dynamicCats = uniqueCategories.map((cat) => {
       let icon = <ShoppingBag className="w-4 h-4 text-emerald-500" />;
       const c = String(cat).toLowerCase();
@@ -119,7 +121,7 @@ export default function CustomerHomePage() {
 
   // Filter stores & deduplicate by store.id
   const filteredStores = useMemo(() => {
-    return stores.filter((store) => {
+    return stores.filter((store: Store) => {
       const matchesCategory = selectedCategory === "all" || store.category === selectedCategory;
       const matchesSearch =
         store.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -133,7 +135,7 @@ export default function CustomerHomePage() {
   // Filter products by search query
   const featuredProducts = useMemo(() => {
     return products.filter(
-      (p) =>
+      (p: Product) =>
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -183,19 +185,6 @@ export default function CustomerHomePage() {
           {/* Header Action Controls */}
           <div className="flex items-center gap-3">
             <ThemeToggle />
-
-            {/* Cart Trigger */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded-2xl bg-white/15 hover:bg-white/25 border border-white/20 text-white transition-all active:scale-95 cursor-pointer shadow-lg"
-            >
-              <ShoppingBag className="w-5 h-5 text-emerald-200" />
-              {totalCartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-white text-[#087F5B] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#087F5B] shadow-md animate-in zoom-in-50">
-                  {totalCartCount}
-                </span>
-              )}
-            </button>
 
             {/* Account / Login */}
             {!isAuthenticated ? (
@@ -291,12 +280,12 @@ export default function CustomerHomePage() {
       {/* 2. DYNAMIC CATEGORY BADGES */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 w-full relative z-20">
         <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-          {categories.map((cat) => (
+          {categories.map((cat: any) => (
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              key={String(cat.id)}
+              onClick={() => setSelectedCategory(String(cat.id))}
               className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-black transition-all whitespace-nowrap cursor-pointer ${
-                selectedCategory === cat.id
+                selectedCategory === String(cat.id)
                   ? "bg-[#087F5B] text-white shadow-md ring-2 ring-[#087F5B]/50"
                   : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
               }`}
@@ -348,7 +337,7 @@ export default function CustomerHomePage() {
             </div>
           ) : (
             <div className="flex items-center gap-8 sm:gap-10 lg:gap-12 overflow-x-auto pb-4 pt-2 scrollbar-none">
-              {filteredStores.map((store) => (
+              {filteredStores.map((store: Store) => (
                 <Link
                   key={store.id}
                   href={`/shop?store=${store.id}`}
@@ -406,7 +395,7 @@ export default function CustomerHomePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-              {featuredProducts.map((prod) => (
+              {featuredProducts.map((prod: Product) => (
                 <ProductCard
                   key={prod.id}
                   product={prod}
